@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job Poster Studio — 5 Variants</title>
+<style>
+  :root {
+    --bg: #14171f;
+    --panel: #1c2030;
+    --panel-2: #232839;
+    --line: #313650;
+    --text: #e6e9f2;
+    --muted: #8d93a8;
+    --accent: #FF6B35;
+    --accent-2: #4F7CFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--text); height: 100%; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    height: 100vh;
+    overflow: hidden;
+  }
+  /* preview area */
+  .preview {
+    position: relative;
+    background: radial-gradient(circle at 50% 30%, #1d2236, #0d1018 80%);
+    overflow: auto;
+    display: flex; flex-direction: column;
+  }
+  .preview-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(20,23,31,0.9);
+    position: sticky; top: 0; z-index: 5;
+  }
+  .preview-header h1 {
+    font-size: 14px; font-weight: 700; letter-spacing: 0.04em;
+  }
+  .variant-tabs {
+    display: flex; gap: 4px; margin-left: 16px;
+    background: var(--panel);
+    padding: 4px; border-radius: 10px;
+  }
+  .variant-tabs button {
+    background: transparent; color: var(--muted);
+    border: none; padding: 8px 14px; border-radius: 7px;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .variant-tabs button:hover { color: var(--text); }
+  .variant-tabs button.active {
+    background: var(--accent); color: #fff;
+  }
+  .preview-header .spacer { flex: 1; }
+  .scale-control {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--muted); font-size: 12px;
+  }
+  .scale-control select, .scale-control button {
+    background: var(--panel); color: var(--text);
+    border: 1px solid var(--line);
+    padding: 6px 10px; border-radius: 6px;
+    font-size: 12px; cursor: pointer;
+    font-family: inherit;
+  }
+  .scale-control button:hover { border-color: var(--accent); }
+
+  .stage {
+    flex: 1; display: flex; align-items: flex-start; justify-content: center;
+    padding: 30px;
+    overflow: auto;
+  }
+  .stage-inner {
+    transform-origin: top center;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+  }
+  .stage-inner iframe {
+    width: 1080px; height: 1080px;
+    border: 0; display: block;
+  }
+
+  /* sidebar — editor */
+  .sidebar {
+    background: var(--panel);
+    border-left: 1px solid var(--line);
+    overflow-y: auto;
+    display: flex; flex-direction: column;
+  }
+  .sidebar section {
+    border-bottom: 1px solid var(--line);
+    padding: 18px 20px;
+  }
+  .sidebar h2 {
+    font-size: 11px; font-weight: 800;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sidebar h2::before {
+    content: ""; width: 12px; height: 2px; background: var(--accent);
+  }
+  .field { margin-bottom: 12px; }
+  .field label {
+    display: block;
+    font-size: 11px; font-weight: 600;
+    color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 5px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--line);
+    padding: 9px 12px; border-radius: 7px;
+    font-size: 13px; font-family: inherit;
+    outline: none;
+    transition: border 0.15s;
+  }
+  .field input:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 70px; line-height: 1.45; }
+  .field .hint {
+    font-size: 10px; color: var(--muted); margin-top: 4px;
+  }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .req-list-edit {
+    list-style: none;
+  }
+  .req-list-edit li {
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 6px; margin-bottom: 6px;
+  }
+  .req-list-edit li input {
+    background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--line);
+    padding: 8px 10px; border-radius: 6px;
+    font-size: 12px; font-family: inherit;
+  }
+  .req-list-edit li button {
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 6px;
+    padding: 0 10px; cursor: pointer; font-size: 14px;
+  }
+  .req-list-edit li button:hover { color: var(--accent); border-color: var(--accent); }
+  .add-req {
+    background: transparent; color: var(--accent);
+    border: 1px dashed var(--line); border-radius: 6px;
+    padding: 8px; width: 100%; cursor: pointer;
+    font-size: 12px; font-family: inherit; font-weight: 600;
+    margin-top: 4px;
+  }
+  .add-req:hover { border-color: var(--accent); }
+
+  .theme-swatches {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .theme-swatches .swatch {
+    cursor: pointer; padding: 8px 10px; border-radius: 6px;
+    border: 1px solid var(--line); background: var(--panel-2);
+    font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .theme-swatches .swatch:hover { border-color: var(--accent); }
+  .theme-swatches .swatch.active { border-color: var(--accent); background: rgba(255,107,53,0.10); }
+  .theme-swatches .swatch .dots {
+    display: flex; gap: 2px;
+  }
+  .theme-swatches .swatch .dots span {
+    width: 12px; height: 12px; border-radius: 3px;
+  }
+
+  .actions {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .btn {
+    flex: 1;
+    background: var(--accent); color: #fff;
+    border: none; padding: 10px 14px; border-radius: 7px;
+    font-size: 12px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .btn:hover { opacity: 0.9; }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+  .btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .url-out {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    word-break: break-all;
+    line-height: 1.5;
+    max-height: 80px; overflow-y: auto;
+  }
+  .url-out .k { color: var(--accent-2); }
+  .url-out .v { color: #c8e6c9; }
+
+  .json-out {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: pre;
+    overflow-x: auto;
+    max-height: 200px; overflow-y: auto;
+    line-height: 1.5;
+  }
+
+  .empty-note {
+    font-size: 11px; color: var(--muted);
+    line-height: 1.5;
+  }
+  .empty-note code {
+    background: var(--panel-2); padding: 1px 5px;
+    border-radius: 3px; color: var(--accent-2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+  <div class="preview">
+    <div class="preview-header">
+      <h1>Job Poster Studio</h1>
+      <div class="variant-tabs" id="tabs">
+        <button data-v="2">2 · Playful Tilt</button>
+        <button data-v="4" class="active">4 · Material</button>
+        <button data-v="5">5 · Editorial</button>
+      </div>
+      <div class="spacer"></div>
+      <div class="scale-control">
+        <span>Scale</span>
+        <select id="scaleSel">
+          <option value="0.30">30%</option>
+          <option value="0.40" selected>40%</option>
+          <option value="0.50">50%</option>
+          <option value="0.60">60%</option>
+          <option value="0.75">75%</option>
+        </select>
+        <button id="reloadBtn">↻ Reload</button>
+        <button id="openTab">Open ↗</button>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-inner" id="stageInner">
+        <iframe id="frame" src="variant-4.html"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <section>
+      <h2>Job basics</h2>
+      <div class="field">
+        <label>Company</label>
+        <input id="f-company" type="text" value="EWIRE">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Logo letter</label>
+          <input id="f-logoLetter" type="text" value="E" maxlength="3">
+        </div>
+        <div class="field">
+          <label>Tagline</label>
+          <input id="f-tagline" type="text" value="Your Payment Partner">
+        </div>
+      </div>
+      <div class="field">
+        <label>Role title</label>
+        <input id="f-role" type="text" value="Senior Backend Developer">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Location</label>
+          <input id="f-location" type="text" value="Cochin, Kerala">
+        </div>
+        <div class="field">
+          <label>Experience</label>
+          <input id="f-experience" type="text" value="5+ years">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Employment type</label>
+          <input id="f-employmentType" type="text" value="Full-time">
+        </div>
+        <div class="field">
+          <label>Workplace</label>
+          <input id="f-workplace" type="text" value="Hybrid">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Email</label>
+          <input id="f-email" type="text" value="hr@ewire.com">
+        </div>
+        <div class="field">
+          <label>CTA label</label>
+          <input id="f-cta" type="text" value="Apply Now">
+        </div>
+      </div>
+      <div class="field">
+        <label>Hero image URL (optional)</label>
+        <input id="f-heroImage" type="text" placeholder="https://...">
+        <div class="hint">Leave blank for built-in CSS/SVG artwork</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Requirements</h2>
+      <ul class="req-list-edit" id="reqList"></ul>
+      <button class="add-req" id="addReq">+ Add requirement</button>
+    </section>
+
+    <section>
+      <h2>Color theme</h2>
+      <div class="theme-swatches" id="themeSwatches"></div>
+      <div class="field" style="margin-top:12px">
+        <label>Accent / primary</label>
+        <input id="f-accent" type="text" value="#FF6B35" placeholder="#FF6B35">
+      </div>
+      <div class="field">
+        <label>Brand / background</label>
+        <input id="f-brand" type="text" value="#0E1B3D" placeholder="#0E1B3D">
+      </div>
+    </section>
+
+    <section>
+      <h2>Pipeline URL</h2>
+      <div class="url-out" id="urlOut"></div>
+      <div class="actions" style="margin-top:10px">
+        <button class="btn ghost" id="copyUrl">Copy URL</button>
+      </div>
+      <div class="empty-note" style="margin-top:10px">
+        Drop into <code>generate.js</code> or open directly in Chrome.
+        Append to any <code>variant-N.html</code>.
+      </div>
+    </section>
+
+    <section>
+      <h2>window.POSTER_DATA</h2>
+      <div class="json-out" id="jsonOut"></div>
+      <div class="actions" style="margin-top:10px">
+        <button class="btn ghost" id="copyJson">Copy JSON</button>
+        <button class="btn" id="pushData">Push to iframe</button>
+      </div>
+      <div class="empty-note" style="margin-top:10px">
+        Inject as <code>&lt;script&gt;window.POSTER_DATA = {...}&lt;/script&gt;</code>
+        before the template's own script, or call <code>frame.contentWindow.renderPoster(data)</code>.
+      </div>
+    </section>
+
+    <section>
+      <h2>Export</h2>
+      <div class="actions">
+        <button class="btn" id="downloadPng">Download PNG</button>
+        <button class="btn ghost" id="copyCli">Copy CLI</button>
+      </div>
+      <div class="empty-note" style="margin-top:10px">
+        Batch export lives in <code>generate.js</code> — feeds <code>jobs.json</code>, outputs PNGs at 2× scale.
+      </div>
+    </section>
+  </aside>
+
+<script>
+const PRESETS = {
+  "EWIRE navy-orange":  { accent: "#FF6B35", brand: "#0E1B3D" },
+  "Ashwastika green-red": { accent: "#E63946", brand: "#1F8A4C" },
+  "EWIRE light blue":   { accent: "#FF7043", brand: "#1E88E5" },
+  "Material purple":    { accent: "#7D5260", brand: "#6750A4" },
+  "Editorial cream":    { accent: "#E63946", brand: "#111111" },
+  "Forest":             { accent: "#F4A261", brand: "#264653" },
+  "Plum":               { accent: "#FFB703", brand: "#3A0CA3" },
+  "Sunset":             { accent: "#F72585", brand: "#4361EE" }
+};
+
+const PALETTES_4 = [
+  { name: "Purple", primary: "#6750A4", primaryContainer: "#EADDFF", onPrimaryContainer: "#21005D", bg: "#FFFBFE" },
+  { name: "Teal",   primary: "#00696D", primaryContainer: "#9CF1F4", onPrimaryContainer: "#002021", bg: "#FAFDFC" },
+  { name: "Rose",   primary: "#7D5260", primaryContainer: "#FFD8E4", onPrimaryContainer: "#31111D", bg: "#FFF8F8" },
+  { name: "Amber",  primary: "#8B5000", primaryContainer: "#FFDCC2", onPrimaryContainer: "#2D1600", bg: "#FFFBF7" },
+  { name: "Indigo", primary: "#415F91", primaryContainer: "#D6E3FF", onPrimaryContainer: "#001B3E", bg: "#F9F9FF" },
+  { name: "Green",  primary: "#3B6939", primaryContainer: "#BCF0B4", onPrimaryContainer: "#002204", bg: "#F8FFF3" },
+  { name: "Red",    primary: "#BA1A1A", primaryContainer: "#FFDAD6", onPrimaryContainer: "#410002", bg: "#FFFBFF" },
+  { name: "Cyan",   primary: "#00639B", primaryContainer: "#D1E4FF", onPrimaryContainer: "#001D35", bg: "#F8F9FF" },
+  { name: "Orange", primary: "#9A4520", primaryContainer: "#FFDBCF", onPrimaryContainer: "#380D00", bg: "#FFFBFF" },
+  { name: "Olive",  primary: "#5D6135", primaryContainer: "#E2E6AC", onPrimaryContainer: "#1A1D00", bg: "#FBFBE2" },
+  { name: "Plum",   primary: "#8E4585", primaryContainer: "#FFD7F5", onPrimaryContainer: "#3A0033", bg: "#FFF7FA" },
+  { name: "Slate",  primary: "#4A5C6B", primaryContainer: "#D3E6F8", onPrimaryContainer: "#071E2B", bg: "#F7FAFD" },
+  { name: "Gold",   primary: "#7A5900", primaryContainer: "#FFE08B", onPrimaryContainer: "#261A00", bg: "#FFFCF0" },
+  { name: "Mint",   primary: "#006B5B", primaryContainer: "#7EF8DC", onPrimaryContainer: "#002019", bg: "#F5FFFB" },
+  { name: "Navy",   primary: "#1E3A8A", primaryContainer: "#DBEAFE", onPrimaryContainer: "#172554", bg: "#F8FAFF" },
+  { name: "Coral",  primary: "#B3261E", primaryContainer: "#FFDAD6", onPrimaryContainer: "#410E0B", bg: "#FFFBFF" }
+];
+
+const state = {
+  variant: 4,
+  scale: 0.40,
+  data: {
+    company: "EWIRE",
+    logoLetter: "E",
+    tagline: "Your Payment Partner",
+    role: "Senior Backend Developer",
+    location: "Cochin, Kerala",
+    experience: "5+ years",
+    email: "hr@ewire.com",
+    cta: "Apply Now",
+    employmentType: "Full-time",
+    workplace: "Hybrid",
+    heroImage: "",
+    requirements: [
+      "Expert in Python with related libraries & frameworks",
+      "Solid grasp of Web development (Django, Flask)",
+      "5+ years of backend engineering experience",
+      "Bachelor's degree in Computer Science or equivalent"
+    ],
+    theme: { primary: "#6750A4", primaryContainer: "#EADDFF", onPrimaryContainer: "#21005D", bg: "#FFFBFE" }
+  }
+};
+
+// ---- UI wiring ----
+const $ = (id) => document.getElementById(id);
+
+function buildURLParams(d) {
+  const p = new URLSearchParams();
+  for (const k of ["company","logoLetter","tagline","role","location","experience","employmentType","workplace","email","cta","heroImage"]) {
+    if (d[k]) p.set(k, d[k]);
+  }
+  if (d.requirements && d.requirements.length) p.set("requirements", d.requirements.join(" | "));
+  if (d.theme) {
+    for (const [k, v] of Object.entries(d.theme)) {
+      if (k !== "name" && v) p.set("theme." + k, v);
+    }
+  }
+  return p.toString();
+}
+
+function refreshURL() {
+  const qs = buildURLParams(state.data);
+  const url = location.origin + location.pathname.replace("index.html","") +
+              "variant-" + state.variant + ".html" + (qs ? "?" + qs : "");
+  // pretty-print
+  let html = url.replace(/([&?])([a-zA-Z.]+)=/g, '$1<span class="k">$2</span>=');
+  html = html.replace(/=(.*?)(?=&|$)/g, (m, v) => '=<span class="v">' + v + '</span>');
+  $("urlOut").innerHTML = html;
+  state.url = url;
+}
+
+function refreshJSON() {
+  // pretty JSON, trimmed
+  const out = { ...state.data };
+  // drop empties
+  for (const k of Object.keys(out)) if (out[k] === "" || out[k] == null) delete out[k];
+  $("jsonOut").textContent = JSON.stringify(out, null, 2);
+}
+
+function renderReqList() {
+  const ul = $("reqList");
+  ul.innerHTML = "";
+  state.data.requirements.forEach((r, i) => {
+    const li = document.createElement("li");
+    li.innerHTML = '<input type="text" value="' + r.replace(/"/g, '&quot;') + '" data-i="' + i + '">' +
+                   '<button data-i="' + i + '" class="del-req">×</button>';
+    ul.appendChild(li);
+  });
+  ul.querySelectorAll("input").forEach(inp => {
+    inp.addEventListener("input", (e) => {
+      state.data.requirements[+e.target.dataset.i] = e.target.value;
+      pushToIframe();
+      refreshURL(); refreshJSON();
+    });
+  });
+  ul.querySelectorAll(".del-req").forEach(b => {
+    b.addEventListener("click", (e) => {
+      state.data.requirements.splice(+e.target.dataset.i, 1);
+      renderReqList(); pushToIframe(); refreshURL(); refreshJSON();
+    });
+  });
+}
+
+function renderThemeSwatches() {
+  const wrap = $("themeSwatches");
+  wrap.innerHTML = "";
+  if (state.variant === 4) {
+    for (const t of PALETTES_4) {
+      const s = document.createElement("div");
+      s.className = "swatch";
+      const th = state.data.theme || {};
+      if (String(th.primary || "").toLowerCase() === t.primary.toLowerCase()) s.classList.add("active");
+      s.innerHTML = '<div class="dots"><span style="background:' + t.primary + '"></span><span style="background:' + t.primaryContainer + '"></span></div>' + t.name;
+      s.addEventListener("click", () => {
+        state.data.theme = { primary: t.primary, primaryContainer: t.primaryContainer, onPrimaryContainer: t.onPrimaryContainer, bg: t.bg };
+        $("f-accent").value = t.primary;
+        $("f-brand").value = t.bg;
+        renderThemeSwatches(); pushToIframe(); refreshURL(); refreshJSON();
+      });
+      wrap.appendChild(s);
+    }
+    return;
+  }
+  for (const [name, t] of Object.entries(PRESETS)) {
+    const s = document.createElement("div");
+    s.className = "swatch";
+    const th = state.data.theme || {};
+    const isActive = String(th.accent || "").toLowerCase() === t.accent.toLowerCase() &&
+                     String(th.brand || "").toLowerCase() === t.brand.toLowerCase();
+    if (isActive) s.classList.add("active");
+    s.innerHTML = '<div class="dots"><span style="background:' + t.brand + '"></span><span style="background:' + t.accent + '"></span></div>' + name;
+    s.addEventListener("click", () => {
+      state.data.theme = { ...t };
+      $("f-accent").value = t.accent;
+      $("f-brand").value = t.brand;
+      renderThemeSwatches(); pushToIframe(); refreshURL(); refreshJSON();
+    });
+    wrap.appendChild(s);
+  }
+}
+
+function pushToIframe() {
+  const frame = $("frame");
+  try {
+    frame.contentWindow.renderPoster(state.data);
+  } catch (e) {
+    // iframe not ready; will pick up via URL on reload
+  }
+}
+
+function loadVariant(v) {
+  state.variant = v;
+  document.querySelectorAll("#tabs button").forEach(b => {
+    b.classList.toggle("active", +b.dataset.v === v);
+  });
+  const qs = buildURLParams(state.data);
+  $("frame").src = "variant-" + v + ".html" + (qs ? "?" + qs : "");
+  renderThemeSwatches();
+  refreshURL();
+}
+
+function applyScale(s) {
+  state.scale = s;
+  $("stageInner").style.transform = "scale(" + s + ")";
+  // size wrapper to scaled dimensions to avoid huge empty space
+  $("stageInner").style.width = (1080 * s) + "px";
+  $("stageInner").style.height = (1080 * s) + "px";
+  const frame = $("frame");
+  frame.style.width = "1080px";
+  frame.style.height = "1080px";
+}
+
+// ---- bind basic fields ----
+const fieldMap = {
+  "f-company":"company","f-logoLetter":"logoLetter","f-tagline":"tagline",
+  "f-role":"role","f-location":"location","f-experience":"experience",
+  "f-employmentType":"employmentType","f-workplace":"workplace",
+  "f-email":"email","f-cta":"cta","f-heroImage":"heroImage"
+};
+for (const [id, key] of Object.entries(fieldMap)) {
+  $(id).addEventListener("input", (e) => {
+    state.data[key] = e.target.value;
+    pushToIframe(); refreshURL(); refreshJSON();
+  });
+}
+$("f-accent").addEventListener("input", (e) => {
+  state.data.theme[state.variant === 4 ? "primary" : "accent"] = e.target.value;
+  renderThemeSwatches(); pushToIframe(); refreshURL(); refreshJSON();
+});
+$("f-brand").addEventListener("input", (e) => {
+  state.data.theme[state.variant === 4 ? "bg" : "brand"] = e.target.value;
+  renderThemeSwatches(); pushToIframe(); refreshURL(); refreshJSON();
+});
+
+$("addReq").addEventListener("click", () => {
+  state.data.requirements.push("New requirement");
+  renderReqList(); pushToIframe(); refreshURL(); refreshJSON();
+});
+
+document.querySelectorAll("#tabs button").forEach(b => {
+  b.addEventListener("click", () => loadVariant(+b.dataset.v));
+});
+$("scaleSel").addEventListener("change", (e) => applyScale(+e.target.value));
+$("reloadBtn").addEventListener("click", () => loadVariant(state.variant));
+$("openTab").addEventListener("click", () => window.open(state.url, "_blank"));
+
+$("copyUrl").addEventListener("click", () => {
+  navigator.clipboard.writeText(state.url);
+  flash($("copyUrl"), "Copied!");
+});
+$("copyJson").addEventListener("click", () => {
+  navigator.clipboard.writeText($("jsonOut").textContent);
+  flash($("copyJson"), "Copied!");
+});
+$("pushData").addEventListener("click", () => {
+  pushToIframe();
+  flash($("pushData"), "Pushed!");
+});
+$("copyCli").addEventListener("click", () => {
+  const cmd = "node generate.js " + state.variant + " --limit 1 --scale 2";
+  navigator.clipboard.writeText(cmd);
+  flash($("copyCli"), "Copied!");
+});
+$("downloadPng").addEventListener("click", () => {
+  alert("Browser-only mode: right-click the poster → save as image, or run `node generate.js 4 --colors all --scale 2` for batch export.");
+});
+
+function flash(btn, text) {
+  const orig = btn.textContent;
+  btn.textContent = text;
+  setTimeout(() => btn.textContent = orig, 1000);
+}
+
+// ---- init ----
+renderReqList();
+renderThemeSwatches();
+refreshURL();
+refreshJSON();
+applyScale(0.40);
+$("frame").addEventListener("load", () => pushToIframe());
+</script>
+</body>
+</html>

@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080, initial-scale=1">
+<title>Variant 4 · Material</title>
+<!--
+  VARIANT 4 — "Material Design"
+  Elevation cards, chips, filled tonal buttons, Roboto-ish type, M3 color tokens.
+-->
+<style>
+  :root {
+    --md-primary: #6750A4;
+    --md-on-primary: #FFFFFF;
+    --md-primary-container: #EADDFF;
+    --md-on-primary-container: #21005D;
+    --md-secondary: #625B71;
+    --md-tertiary: #7D5260;
+    --md-surface: #FFFBFE;
+    --md-surface-variant: #E7E0EC;
+    --md-on-surface: #1C1B1F;
+    --md-on-surface-variant: #49454F;
+    --md-outline: #79747E;
+    --md-bg: #FFFBFE;
+    --md-success: #2E7D32;
+    --md-success-container: #C8E6C9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #d4cccc; }
+  body { font-family: 'Roboto', 'Inter', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif; }
+  .poster {
+    width: 1080px; height: 1080px;
+    background: var(--md-bg);
+    color: var(--md-on-surface);
+    position: relative;
+    overflow: hidden;
+    padding: 56px 60px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 28px;
+  }
+  /* M3 top app bar style */
+  .topbar {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .logo {
+    width: 48px; height: 48px;
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 22px;
+  }
+  .brand-name { font-weight: 600; font-size: 22px; letter-spacing: 0.02em; }
+  .brand-tag { color: var(--md-on-surface-variant); font-size: 13px; letter-spacing: 0.04em; }
+  .topbar-spacer { flex: 1; }
+  .status-pill {
+    background: var(--md-success-container);
+    color: var(--md-success);
+    padding: 8px 14px 8px 12px;
+    border-radius: 999px;
+    font-weight: 700; font-size: 13px;
+    display: inline-flex; align-items: center; gap: 6px;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .status-pill::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--md-success);
+  }
+
+  /* hero card */
+  .hero {
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+    border-radius: 28px;
+    padding: 36px 38px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 24px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: ""; position: absolute; right: -120px; top: -120px;
+    width: 320px; height: 320px; border-radius: 50%;
+    background: rgba(103,80,164,0.10);
+  }
+  .hero .eyebrow {
+    font-weight: 700; font-size: 13px; letter-spacing: 0.16em;
+    text-transform: uppercase; opacity: 0.7;
+    margin-bottom: 8px;
+  }
+  .hero h1 {
+    font-size: 60px; line-height: 1; font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 18px;
+  }
+  .hero .sub {
+    font-size: 16px; opacity: 0.78; max-width: 420px;
+  }
+  .hero-visual {
+    position: relative; z-index: 1;
+    height: 220px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hero-visual svg { width: 200px; height: 200px; }
+
+  /* chips row */
+  .chips {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .chip {
+    background: var(--md-surface-variant);
+    color: var(--md-on-surface-variant);
+    padding: 8px 16px; border-radius: 8px;
+    font-weight: 500; font-size: 14px;
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid transparent;
+  }
+  .chip svg { width: 16px; height: 16px; }
+  .chip.assist { background: transparent; border-color: var(--md-outline); }
+
+  /* body grid */
+  .body-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 20px;
+    min-height: 0;
+  }
+  .card {
+    background: var(--md-surface);
+    border-radius: 20px;
+    padding: 24px 26px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.06);
+    display: flex; flex-direction: column;
+  }
+  .card .req-list { flex: 1; justify-content: space-around; }
+  .card-title {
+    font-weight: 700; font-size: 14px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--md-primary);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-title .icon-circle {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card-title .icon-circle svg { width: 16px; height: 16px; }
+  .req-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .req-list li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 16px; line-height: 1.45; color: var(--md-on-surface);
+  }
+  .req-list li > span { flex: 1; }
+  .req-list li::before {
+    content: ""; flex-shrink: 0;
+    width: 20px; height: 20px; margin-top: 2px;
+    border-radius: 50%;
+    background: var(--md-primary);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z'/></svg>");
+    background-size: 13px; background-position: center; background-repeat: no-repeat;
+  }
+
+  .info-card .info-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--md-surface-variant);
+  }
+  .info-card .info-row:last-child { border-bottom: none; }
+  .info-card .info-row .icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--md-primary-container);
+    color: var(--md-on-primary-container);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .info-card .info-row .icon svg { width: 18px; height: 18px; }
+  .info-card .info-row .label {
+    font-size: 11px; color: var(--md-on-surface-variant);
+    text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+  }
+  .info-card .info-row .value {
+    font-weight: 600; font-size: 15px; color: var(--md-on-surface);
+  }
+
+  /* CTA bar */
+  .cta-bar {
+    display: flex; align-items: center; gap: 14px;
+  }
+  .btn-filled {
+    background: var(--md-primary);
+    color: var(--md-on-primary);
+    padding: 14px 30px; border-radius: 999px;
+    font-weight: 600; font-size: 15px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.18), 0 4px 10px rgba(103,80,164,0.25);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-filled svg { width: 18px; height: 18px; }
+  .btn-outlined {
+    background: transparent;
+    color: var(--md-primary);
+    padding: 14px 26px; border-radius: 999px;
+    font-weight: 600; font-size: 15px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    border: 1px solid var(--md-outline);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-outlined svg { width: 18px; height: 18px; }
+  .cta-meta {
+    margin-left: auto;
+    text-align: right;
+  }
+  .cta-meta .label {
+    font-size: 11px; color: var(--md-on-surface-variant);
+    text-transform: uppercase; letter-spacing: 0.12em; font-weight: 600;
+  }
+  .cta-meta .value { font-weight: 700; font-size: 16px; color: var(--md-primary); }
+</style>
+</head>
+<body>
+<div class="poster" id="poster">
+  <!-- top bar -->
+  <div class="topbar">
+    <div class="logo" id="logo">M</div>
+    <div>
+      <div class="brand-name" id="company">Materialize Inc.</div>
+      <div class="brand-tag" id="tagline">Build beautiful products</div>
+    </div>
+    <div class="topbar-spacer"></div>
+    <div class="status-pill">Open Role</div>
+  </div>
+
+  <!-- hero card -->
+  <div class="hero">
+    <div>
+      <div class="eyebrow">We're Hiring</div>
+      <h1 id="role">Product Designer</h1>
+      <div class="sub" id="heroSub">Join a small, senior team shipping thoughtful, accessible product experiences at scale.</div>
+      <div class="chips" id="chips" style="margin-top:18px"></div>
+    </div>
+    <div class="hero-visual">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="100" cy="100" r="92" fill="#fff" opacity="0.4"/>
+        <circle cx="100" cy="100" r="70" fill="#fff" opacity="0.6"/>
+        <!-- material-style briefcase icon -->
+        <rect x="60" y="80" width="80" height="60" rx="10" fill="#6750A4"/>
+        <rect x="85" y="70" width="30" height="14" rx="4" fill="none" stroke="#6750A4" stroke-width="6"/>
+        <rect x="60" y="100" width="80" height="6" fill="#fff" opacity="0.4"/>
+        <circle cx="100" cy="115" r="6" fill="#fff"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- body -->
+  <div class="body-grid">
+    <div class="card">
+      <div class="card-title">
+        <span class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
+        </span>
+        What you'll do
+      </div>
+      <ul class="req-list" id="reqs"></ul>
+    </div>
+
+    <div class="card info-card">
+      <div class="card-title">
+        <span class="icon-circle">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+        </span>
+        Role snapshot
+      </div>
+      <div id="info-rows"></div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-bar">
+    <div class="btn-filled" id="cta">
+      Apply Now
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </div>
+    <div class="btn-outlined">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M4 8l8 5 8-5"/></svg>
+      Share
+    </div>
+    <div class="cta-meta">
+      <div class="label">Apply at</div>
+      <div class="value" id="email">careers@materialize.io</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULTS = {
+  company: "Materialize Inc.",
+  logoLetter: "M",
+  tagline: "Build beautiful products",
+  role: "Product Designer",
+  heroSub: "Join a small, senior team shipping thoughtful, accessible product experiences at scale.",
+  location: "Bengaluru, India",
+  experience: "3–5 years",
+  employmentType: "Full-time",
+  workplace: "Hybrid",
+  email: "careers@materialize.io",
+  cta: "Apply Now",
+  requirements: [
+    "Drive end-to-end product design from research to high-fidelity specs",
+    "Partner closely with <strong>engineering and PM</strong> to ship iteratively",
+    "Build and maintain our <strong>design system</strong> in Figma",
+    "Champion <strong>accessibility</strong> (WCAG) and inclusive design",
+    "5+ years designing consumer or B2B SaaS products"
+  ],
+  chips: [],
+  theme: {
+    primary: "#6750A4",
+    primaryContainer: "#EADDFF",
+    onPrimaryContainer: "#21005D",
+    bg: "#FFFBFE"
+  }
+};
+
+function readURLParams() {
+  const p = new URLSearchParams(location.search);
+  const out = {};
+  for (const [k, v] of p.entries()) {
+    if (k === "requirements") out.requirements = v.split("|").map(s => s.trim()).filter(Boolean);
+    else if (k.startsWith("theme.")) {
+      out.theme = out.theme || {};
+      out.theme[k.slice(6)] = v;
+    } else out[k] = v;
+  }
+  return out;
+}
+
+function mergeData() {
+  const urlData = readURLParams();
+  const merged = { ...DEFAULTS, ...urlData };
+  merged.theme = { ...DEFAULTS.theme, ...(urlData.theme || {}), ...(window.POSTER_DATA?.theme || {}) };
+  if (window.POSTER_DATA) Object.assign(merged, window.POSTER_DATA, { theme: merged.theme });
+  return merged;
+}
+
+function applyTheme(t) {
+  const r = document.documentElement.style;
+  if (t.primary) r.setProperty("--md-primary", t.primary);
+  if (t.onPrimary) r.setProperty("--md-on-primary", t.onPrimary);
+  if (t.primaryContainer) r.setProperty("--md-primary-container", t.primaryContainer);
+  if (t.onPrimaryContainer) r.setProperty("--md-on-primary-container", t.onPrimaryContainer);
+  if (t.bg) r.setProperty("--md-bg", t.bg);
+}
+
+const ICONS = {
+  pin:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-7.5 7-13a7 7 0 1 0-14 0c0 5.5 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>',
+  brief: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  cap:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8l10-4 10 4-10 4z"/><path d="M6 10v6c0 1 3 3 6 3s6-2 6-3v-6"/></svg>',
+  tag:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 13l-7 7a2 2 0 0 1-2.8 0L3 13V3h10z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>',
+  home:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8v10a2 2 0 0 1-2 2h-3v-7H10v7H7a2 2 0 0 1-2-2z"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>'
+};
+
+function renderPoster(data) {
+  data = data || mergeData();
+  applyTheme(data.theme);
+
+  document.getElementById("logo").textContent = (data.logoLetter || (data.company || "?")[0]).toUpperCase();
+  document.getElementById("company").textContent = data.company;
+  document.getElementById("tagline").textContent = data.tagline;
+  document.getElementById("role").textContent = data.role;
+  document.getElementById("heroSub").textContent = data.heroSub;
+  document.getElementById("email").textContent = data.email;
+  document.getElementById("cta").firstChild.textContent = data.cta + " ";
+
+  // chips (explicit list, else derive from the discrete fields)
+  let chips = Array.isArray(data.chips) ? data.chips.filter((c) => c && typeof c === "object") : [];
+  if (!chips.length) {
+    chips = [];
+    if (data.location) chips.push({ icon: "pin", label: data.location });
+    if (data.experience) chips.push({ icon: "brief", label: data.experience });
+    if (data.employmentType) chips.push({ icon: "tag", label: data.employmentType });
+    if (data.workplace) chips.push({ icon: "home", label: data.workplace });
+  }
+  const chipsEl = document.getElementById("chips");
+  chipsEl.innerHTML = "";
+  for (const c of chips) {
+    const chip = document.createElement("div");
+    chip.className = "chip";
+    chip.innerHTML = (ICONS[c.icon] || "") + "<span>" + c.label + "</span>";
+    chipsEl.appendChild(chip);
+  }
+
+  // requirements
+  const ul = document.getElementById("reqs");
+  ul.innerHTML = "";
+  for (const r of data.requirements) {
+    const li = document.createElement("li");
+    const span = document.createElement("span");
+    span.innerHTML = r;
+    li.appendChild(span);
+    ul.appendChild(li);
+  }
+
+  // info rows
+  const infoEl = document.getElementById("info-rows");
+  infoEl.innerHTML = "";
+  const rows = [];
+  if (data.location)       rows.push({ icon: "pin",   label: "Location",  value: data.location });
+  if (data.experience)     rows.push({ icon: "brief", label: "Experience", value: data.experience });
+  if (data.employmentType) rows.push({ icon: "tag",   label: "Type",       value: data.employmentType });
+  if (data.workplace)      rows.push({ icon: "home",  label: "Workplace",  value: data.workplace });
+  if (data.education)      rows.push({ icon: "cap",   label: "Education",  value: data.education });
+  for (const r of rows) {
+    const row = document.createElement("div");
+    row.className = "info-row";
+    row.innerHTML = '<div class="icon">' + (ICONS[r.icon] || "") + '</div><div><div class="label">' + r.label + '</div><div class="value">' + r.value + '</div></div>';
+    infoEl.appendChild(row);
+  }
+}
+
+window.renderPoster = renderPoster;
+window.addEventListener("DOMContentLoaded", () => renderPoster());
+</script>
+</body>
+</html>

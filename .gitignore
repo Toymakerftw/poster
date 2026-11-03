@@ -1,0 +1,5 @@
+# Runtime job data fetched by the workflow
+jobs.json
+
+# Local render output
+out/

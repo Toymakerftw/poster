@@ -1,0 +1,93 @@
+name: Generate Job Posters
+
+on:
+  schedule:
+    # UTC. Fires every 7 hours: 00:00, 07:00, 14:00, 21:00.
+    - cron: "0 */7 * * *"
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "Max new posts this run (0 = all new)"
+        required: false
+        default: "0"
+      backfill:
+        description: "First run only: process every existing job"
+        type: boolean
+        required: false
+        default: false
+      palette:
+        description: "rotate | all | palette name (purple, teal, ...) | 1-based index"
+        required: false
+        default: "rotate"
+      variant:
+        description: "Poster variant: 2, 4 or 5"
+        required: false
+        default: "4"
+      scale:
+        description: "Device scale factor (1 = 1080px, 2 = 2160px)"
+        required: false
+        default: "1"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: poster-generation
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Chrome
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Fetch latest jobs.json
+        run: |
+          curl -fsSL "https://github.com/Toymakerftw/kljob/raw/refs/heads/main/data/jobs.json" -o jobs.json
+          node -e "const a=require('./jobs.json'); if(!Array.isArray(a)) throw new Error('jobs.json is not an array'); console.log('jobs:', a.length)"
+
+      - name: Generate posters
+        env:
+          CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
+          COUNT: ${{ github.event.inputs.count || '0' }}
+          PALETTE: ${{ github.event.inputs.palette || 'rotate' }}
+          VARIANT: ${{ github.event.inputs.variant || '4' }}
+          SCALE: ${{ github.event.inputs.scale || '1' }}
+          BACKFILL: ${{ github.event.inputs.backfill || 'false' }}
+        run: |
+          ARGS=(--count "$COUNT" --palette "$PALETTE" --variant "$VARIANT" --scale "$SCALE")
+          if [ "$BACKFILL" = "true" ]; then ARGS+=(--backfill); fi
+          node scripts/automate.js "${ARGS[@]}"
+
+      - name: Upload posters artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: posters-${{ github.run_id }}
+          path: posts
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Commit timestamped posters
+        run: |
+          mkdir -p posts state
+          git config user.name "poster-bot"
+          git config user.email "poster-bot@users.noreply.github.com"
+          git add posts state
+          if git diff --cached --quiet; then
+            echo "No new posters to commit."
+          else
+            git commit -m "posters: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push
+          fi

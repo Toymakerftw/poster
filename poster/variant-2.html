@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080, initial-scale=1">
+<title>Variant 2 · Playful Tilt</title>
+<!--
+  VARIANT 2 — "Playful Tilt"  (Ashwastika-inspired)
+  Same 3 injection methods as variant-1.
+-->
+<style>
+  :root {
+    --brand: #1F8A4C;
+    --accent: #E63946;
+    --ink: #111;
+    --bg: #FFFFFF;
+    --card-bg: #161616;
+    --card-ink: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #e9e9e9; }
+  body { font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif; }
+  .poster {
+    width: 1080px; height: 1080px;
+    background: var(--bg);
+    color: var(--ink);
+    position: relative;
+    overflow: hidden;
+    padding: 56px 64px;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.045) 1px, transparent 1px);
+    background-size: 36px 36px;
+  }
+  /* watermark */
+  .watermark {
+    position: absolute; right: -40px; bottom: -40px;
+    font-weight: 900; font-size: 220px; color: rgba(0,0,0,0.04);
+    letter-spacing: -0.05em; line-height: 0.9;
+    pointer-events: none;
+  }
+  /* social row */
+  .social {
+    display: flex; gap: 14px; align-items: center;
+    position: absolute; top: 56px; left: 64px;
+    z-index: 3;
+  }
+  .social a {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #111; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px;
+    text-decoration: none;
+  }
+  /* brand */
+  .brand-block {
+    position: absolute; top: 56px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    z-index: 3;
+  }
+  .brand-logo {
+    width: 64px; height: 64px;
+    background: var(--brand);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 8px;
+  }
+  .brand-logo svg { width: 38px; height: 38px; }
+  .brand-name {
+    font-weight: 800; font-size: 18px; letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  /* layout */
+  .canvas {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 150px 64px 80px;
+  }
+  .we-are-hiring {
+    display: flex; align-items: baseline; gap: 16px;
+    margin-bottom: 14px;
+  }
+  .script {
+    font-family: 'Brush Script MT', 'Segoe Script', cursive;
+    font-size: 64px; color: var(--ink); font-style: italic;
+    line-height: 1; transform: rotate(-3deg);
+  }
+  .hiring-big {
+    font-size: 92px; font-weight: 900; color: var(--accent);
+    letter-spacing: -0.02em; line-height: 1;
+    text-transform: uppercase;
+  }
+  .pin {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--brand); font-weight: 700; font-size: 18px;
+    margin-bottom: 28px;
+  }
+  .pin svg { width: 22px; height: 22px; }
+
+  /* tilt card */
+  .role-card {
+    background: var(--card-bg);
+    color: var(--card-ink);
+    padding: 36px 48px;
+    border-radius: 22px;
+    transform: rotate(-3deg);
+    box-shadow: 18px 18px 0 var(--accent), 0 30px 60px rgba(0,0,0,0.25);
+    position: relative;
+    max-width: 760px;
+    margin-bottom: 30px;
+  }
+  .role-card .star {
+    position: absolute; top: -20px; left: -20px;
+    width: 60px; height: 60px;
+    background: var(--brand);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transform: rotate(0deg);
+  }
+  .role-card .star svg { width: 32px; height: 32px; }
+  .role-card .role-text {
+    font-size: 64px; font-weight: 900; letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .role-card .open-positions {
+    display: inline-block; margin-top: 14px;
+    background: #fff; color: var(--accent);
+    padding: 6px 16px; border-radius: 999px;
+    font-weight: 800; font-size: 14px;
+    text-transform: lowercase; letter-spacing: 0.04em;
+  }
+
+  /* requirements */
+  .req-block {
+    width: 100%; max-width: 760px;
+    margin-top: 10px;
+  }
+  .req-title {
+    font-weight: 800; font-size: 18px; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--ink);
+    margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .req-title::after {
+    content: ""; flex: 1; height: 2px; background: var(--ink); opacity: 0.15;
+  }
+  .req-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .req-list li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 19px; line-height: 1.4; color: #2a2a2a;
+  }
+  .req-list li > span { flex: 1; }
+  .req-list li .star-i {
+    flex-shrink: 0; width: 18px; height: 18px;
+    color: var(--accent); margin-top: 4px;
+  }
+  .req-list li .star-i svg { width: 100%; height: 100%; }
+
+  /* footer */
+  .footer-cta {
+    position: absolute; bottom: 56px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 14px;
+    z-index: 3;
+  }
+  .cta-btn {
+    background: var(--brand); color: #fff;
+    padding: 18px 36px; border-radius: 999px;
+    font-weight: 800; font-size: 18px; letter-spacing: 0.04em;
+    text-transform: uppercase;
+    box-shadow: 0 10px 24px rgba(31,138,76,0.35);
+  }
+  .arrow-circle {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+  }
+  .arrow-circle svg { width: 26px; height: 26px; }
+</style>
+</head>
+<body>
+<div class="poster" id="poster">
+  <div class="watermark">HIRING</div>
+
+  <div class="social">
+    <a title="Behance">Be</a>
+    <a title="Pinterest">P</a>
+    <a title="Dribbble">Dr</a>
+    <a title="Instagram">Ig</a>
+    <a title="LinkedIn">in</a>
+  </div>
+
+  <div class="brand-block">
+    <div class="brand-logo">
+      <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 21 12 16.51 5.79 21l2.39-7.15L2 9.36h7.61z"/></svg>
+    </div>
+    <div class="brand-name" id="company">Ashwastika Design Studio</div>
+  </div>
+
+  <div class="canvas">
+    <div class="we-are-hiring">
+      <span class="script">We're</span>
+      <span class="hiring-big">HIRING</span>
+    </div>
+    <div class="pin">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+      <span id="location">Rajkot</span>
+    </div>
+
+    <div class="role-card">
+      <div class="star">
+        <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 21 12 16.51 5.79 21l2.39-7.15L2 9.36h7.61z"/></svg>
+      </div>
+      <div class="role-text" id="role">Creative Graphic Designer</div>
+      <div class="open-positions">#OpenPositions</div>
+    </div>
+
+    <div class="req-block">
+      <div class="req-title">What you need</div>
+      <ul class="req-list" id="reqs"></ul>
+    </div>
+  </div>
+
+  <div class="footer-cta">
+    <div class="cta-btn" id="cta">Join Our Creative Team</div>
+    <div class="arrow-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULTS = {
+  company: "Ashwastika Design Studio",
+  role: "Creative Graphic Designer",
+  location: "Rajkot",
+  cta: "Join Our Creative Team",
+  requirements: [
+    "0–2 Years of Graphic Design Experience",
+    "Strong Adobe Creative Suite Skills",
+    "Creative Thinking & Attention to Detail"
+  ],
+  social: ["Be", "P", "Dr", "Ig", "in"],
+  theme: { brand: "#1F8A4C", accent: "#E63946", bg: "#FFFFFF", cardBg: "#161616" }
+};
+
+function readURLParams() {
+  const p = new URLSearchParams(location.search);
+  const out = {};
+  for (const [k, v] of p.entries()) {
+    if (k === "requirements") out.requirements = v.split("|").map(s => s.trim()).filter(Boolean);
+    else if (k === "social") out.social = v.split("|").map(s => s.trim()).filter(Boolean);
+    else if (k.startsWith("theme.")) {
+      out.theme = out.theme || {};
+      out.theme[k.slice(6)] = v;
+    } else out[k] = v;
+  }
+  return out;
+}
+
+function mergeData() {
+  const urlData = readURLParams();
+  const merged = { ...DEFAULTS, ...urlData };
+  merged.theme = { ...DEFAULTS.theme, ...(urlData.theme || {}), ...(window.POSTER_DATA?.theme || {}) };
+  if (window.POSTER_DATA) Object.assign(merged, window.POSTER_DATA, { theme: merged.theme });
+  return merged;
+}
+
+function applyTheme(t) {
+  const r = document.documentElement.style;
+  r.setProperty("--brand", t.brand);
+  r.setProperty("--accent", t.accent);
+  r.setProperty("--bg", t.bg);
+  if (t.cardBg) r.setProperty("--card-bg", t.cardBg);
+}
+
+function renderPoster(data) {
+  data = data || mergeData();
+  applyTheme(data.theme);
+
+  document.getElementById("company").textContent = data.company;
+  document.getElementById("role").textContent = data.role;
+  document.getElementById("location").textContent = data.location;
+  document.getElementById("cta").textContent = data.cta;
+
+  const ul = document.getElementById("reqs");
+  ul.innerHTML = "";
+  const starSvg = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5z"/></svg>';
+  // Actually use a 4-point star to match the source:
+  const star4 = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.5 7.5L22 12l-7.5 2.5L12 22l-2.5-7.5L2 12l7.5-2.5z"/></svg>';
+  for (const req of data.requirements) {
+    const li = document.createElement("li");
+    li.innerHTML = '<span class="star-i">' + star4 + '</span><span>' + req + '</span>';
+    ul.appendChild(li);
+  }
+
+  // Social row
+  const socialEl = document.querySelector(".social");
+  socialEl.innerHTML = "";
+  for (const s of (data.social || [])) {
+    const a = document.createElement("a");
+    a.textContent = s;
+    socialEl.appendChild(a);
+  }
+}
+
+window.renderPoster = renderPoster;
+window.addEventListener("DOMContentLoaded", () => renderPoster());
+</script>
+</body>
+</html>

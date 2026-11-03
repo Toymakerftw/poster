@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080, initial-scale=1">
+<title>Variant 5 · Editorial</title>
+<!--
+  VARIANT 5 — "Editorial / Bold Typographic"
+  Magazine-spread look. Huge headline, narrow column for the brief, full-width footer band.
+-->
+<style>
+  :root {
+    --ink: #111111;
+    --paper: #F5EFE6;
+    --accent: #E63946;
+    --brand: #111111;
+    --muted: #6B6B6B;
+    --rule: #1a1a1a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #d6d0c5; }
+  body { font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif; }
+  .poster {
+    width: 1080px; height: 1080px;
+    background: var(--paper);
+    color: var(--ink);
+    position: relative;
+    overflow: hidden;
+    padding: 40px 64px 0;
+    display: grid;
+    grid-template-rows: auto auto auto 1fr auto;
+  }
+  /* masthead */
+  .masthead {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding-bottom: 18px;
+    border-bottom: 2px solid var(--rule);
+  }
+  .masthead .issue {
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .masthead .issue strong { color: var(--ink); }
+  .masthead .brand {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-weight: 900; font-size: 38px; letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .masthead .meta {
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  /* section header strip */
+  .section-strip {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .section-strip .label {
+    font-size: 12px; font-weight: 800;
+    letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--accent);
+  }
+  .section-strip .label::before {
+    content: "§ "; color: var(--ink);
+  }
+  .section-strip .date {
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* hero headline */
+  .hero {
+    padding: 22px 0 18px;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 32px;
+    align-items: start;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-weight: 900;
+    font-size: 124px;
+    line-height: 0.86;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+  }
+  .hero h1 .ital {
+    font-style: italic; color: var(--accent);
+    font-weight: 900;
+  }
+  .hero .lede {
+    font-size: 16px; line-height: 1.45;
+    color: var(--ink);
+    padding-bottom: 12px;
+    border-left: 2px solid var(--accent);
+    padding-left: 16px;
+  }
+  .hero .lede .small {
+    display: block; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 6px;
+  }
+
+  /* body 2-col */
+  .body {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 48px;
+    padding: 22px 0 26px;
+    border-top: 1px solid var(--rule);
+    align-items: stretch;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .left-col, .right-col {
+    display: flex; flex-direction: column;
+  }
+  .left-col .req-list { flex: 1; justify-content: space-evenly; padding: 6px 0; }
+  .right-col .quote { margin-top: auto; }
+  .col-title {
+    font-size: 12px; font-weight: 800;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .req-list {
+    list-style: none;
+    columns: 1;
+    column-gap: 28px;
+  }
+  .req-list li {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px dotted #c8c2b5;
+    font-size: 16px; line-height: 1.4;
+    break-inside: avoid;
+  }
+  .req-list li .num {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-weight: 900; font-style: italic;
+    color: var(--accent); font-size: 20px;
+  }
+
+  .right-col .fact-row {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    column-gap: 18px;
+    align-items: baseline;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .right-col .fact-row .k {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .right-col .fact-row .v {
+    font-size: 18px; font-weight: 700; color: var(--ink);
+  }
+  .right-col .quote {
+    margin-top: 20px;
+    padding: 18px 20px;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 4px;
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.3;
+  }
+  .right-col .quote .by {
+    display: block; font-style: normal; font-family: 'Inter', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.18em;
+    text-transform: uppercase; margin-top: 10px;
+    color: var(--accent);
+  }
+
+  /* footer band */
+  .footer {
+    margin: 0 -64px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 18px 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 24px;
+  }
+  .footer .left {
+    display: flex; align-items: center; gap: 18px;
+  }
+  .footer .cta {
+    background: var(--accent); color: #fff;
+    padding: 14px 28px; border-radius: 4px;
+    font-weight: 800; font-size: 14px;
+    text-transform: uppercase; letter-spacing: 0.14em;
+  }
+  .footer .cta-text {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-style: italic; font-size: 22px; line-height: 1.1;
+    max-width: 460px;
+  }
+  .footer .right {
+    text-align: right;
+  }
+  .footer .right .label {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: rgba(245,239,230,0.6);
+  }
+  .footer .right .email {
+    font-size: 18px; font-weight: 700;
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+<div class="poster" id="poster">
+  <!-- masthead -->
+  <div class="masthead">
+    <div class="issue">№ 042 · <strong>Careers Edition</strong></div>
+    <div class="brand" id="company">THE STANDARD</div>
+    <div class="meta">Volume IX · <span id="dateLabel">2026</span></div>
+  </div>
+
+  <!-- strip -->
+  <div class="section-strip">
+    <div class="label">Now Hiring</div>
+    <div class="date">A standing invitation</div>
+  </div>
+
+  <!-- hero -->
+  <div class="hero">
+    <h1 id="role">Senior<br><span class="ital">Data</span><br>Engineer</h1>
+    <div class="lede">
+      <span class="small">The brief</span>
+      <span id="lede">We're looking for an engineer who treats pipelines as craft — reliable, observable, and quietly elegant. You'll own ingestion, transformation, and the data contracts our products depend on.</span>
+    </div>
+  </div>
+
+  <!-- body -->
+  <div class="body">
+    <div class="left-col">
+      <div class="col-title">What the role asks of you</div>
+      <ol class="req-list" id="reqs"></ol>
+    </div>
+    <div class="right-col">
+      <div class="col-title">Particulars</div>
+      <div id="facts"></div>
+      <div class="quote">
+        "We hire people who'd rather ship one durable system than ten throwaway ones."
+        <span class="by">— The Engineering Team</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- footer band -->
+  <div class="footer">
+    <div class="left">
+      <div class="cta" id="cta">Apply</div>
+      <div class="cta-text" id="ctaText">If this sounds like you, we'd love to read your note.</div>
+    </div>
+    <div class="right">
+      <div class="label">Write to</div>
+      <div class="email" id="email">careers@standard.co</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULTS = {
+  company: "THE STANDARD",
+  issue: "№ 042 · Careers Edition",
+  dateLabel: "2026",
+  role: "Senior Data Engineer",
+  roleItalicWord: "Data",   // word to italicize in role
+  lede: "We're looking for an engineer who treats pipelines as craft — reliable, observable, and quietly elegant. You'll own ingestion, transformation, and the data contracts our products depend on.",
+  requirements: [
+    "Build and operate large-scale <strong>ETL/ELT pipelines</strong> in Python or Go",
+    "Own data contracts and <strong>schema evolution</strong> across teams",
+    "Deep experience with <strong>Spark, Airflow, Kafka</strong> or equivalents",
+    "Strong SQL and warehouse modeling on <strong>Snowflake / BigQuery</strong>",
+    "Champion <strong>observability, lineage, and data quality</strong> as first-class concerns",
+    "Mentor engineers and review work with kindness and rigor"
+  ],
+  facts: [
+    { k: "Location",   v: "Remote · India" },
+    { k: "Experience", v: "5+ years" },
+    { k: "Type",       v: "Full-time" },
+    { k: "Compensation", v: "₹ 45–70 LPA" },
+    { k: "Reports to", v: "Head of Data" }
+  ],
+  email: "careers@standard.co",
+  cta: "Apply",
+  ctaText: "If this sounds like you, we'd love to read your note.",
+  theme: { ink: "#111111", paper: "#F5EFE6", accent: "#E63946" }
+};
+
+function readURLParams() {
+  const p = new URLSearchParams(location.search);
+  const out = {};
+  for (const [k, v] of p.entries()) {
+    if (k === "requirements") out.requirements = v.split("|").map(s => s.trim()).filter(Boolean);
+    else if (k.startsWith("theme.")) {
+      out.theme = out.theme || {};
+      out.theme[k.slice(6)] = v;
+    } else out[k] = v;
+  }
+  return out;
+}
+
+function mergeData() {
+  const urlData = readURLParams();
+  const merged = { ...DEFAULTS, ...urlData };
+  merged.theme = { ...DEFAULTS.theme, ...(urlData.theme || {}), ...(window.POSTER_DATA?.theme || {}) };
+  if (window.POSTER_DATA) Object.assign(merged, window.POSTER_DATA, { theme: merged.theme });
+  return merged;
+}
+
+function applyTheme(t) {
+  const r = document.documentElement.style;
+  if (t.ink)    r.setProperty("--ink", t.ink);
+  if (t.paper)  r.setProperty("--paper", t.paper);
+  if (t.accent) r.setProperty("--accent", t.accent);
+}
+
+function renderPoster(data) {
+  data = data || mergeData();
+  applyTheme(data.theme);
+
+  document.getElementById("company").textContent = data.company;
+  document.getElementById("dateLabel").textContent = data.dateLabel;
+  document.querySelector(".issue").innerHTML = data.issue;
+  document.getElementById("lede").textContent = data.lede;
+  document.getElementById("email").textContent = data.email;
+  document.getElementById("cta").textContent = data.cta;
+  document.getElementById("ctaText").textContent = data.ctaText;
+
+  // role with italic word
+  const roleEl = document.getElementById("role");
+  const role = data.role || "";
+  if (data.roleItalicWord) {
+    const re = new RegExp("(" + data.roleItalicWord.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "i");
+    roleEl.innerHTML = role.replace(re, '<span class="ital">$1</span>');
+  } else {
+    roleEl.textContent = role;
+  }
+
+  // requirements with editorial numbering
+  const ul = document.getElementById("reqs");
+  ul.innerHTML = "";
+  const pad = (n) => n.toString().padStart(2, "0");
+  data.requirements.forEach((r, i) => {
+    const li = document.createElement("li");
+    li.innerHTML = '<span class="num">' + pad(i + 1) + '</span><span>' + r + '</span>';
+    ul.appendChild(li);
+  });
+
+  // facts
+  const factsEl = document.getElementById("facts");
+  factsEl.innerHTML = "";
+  for (const f of (data.facts || [])) {
+    const row = document.createElement("div");
+    row.className = "fact-row";
+    row.innerHTML = '<div class="k">' + f.k + '</div><div class="v">' + f.v + '</div>';
+    factsEl.appendChild(row);
+  }
+}
+
+window.renderPoster = renderPoster;
+window.addEventListener("DOMContentLoaded", () => renderPoster());
+</script>
+</body>
+</html>

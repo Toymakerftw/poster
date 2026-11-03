@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080, initial-scale=1">
+<title>Variant 1 · Dark Tech</title>
+<!--
+  VARIANT 1 — "Dark Tech"  (EWIRE-inspired)
+  Pipeline-ready. Three injection methods, in priority order:
+    1. window.POSTER_DATA = {...}            (highest priority)
+    2. URL query params  ?company=...&role=...
+    3. defaults baked into DEFAULTS below
+  Call renderPoster(data) any time to (re)render with custom data.
+-->
+<style>
+  :root {
+    --brand: #0E1B3D;
+    --accent: #FF6B35;
+    --bg: #0E1B3D;
+    --ink: #FFFFFF;
+    --muted: rgba(255,255,255,0.72);
+    --chip-bg: rgba(255,255,255,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #20283a; }
+  body { font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif; }
+  .poster {
+    width: 1080px; height: 1080px;
+    background: var(--bg);
+    color: var(--ink);
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+  }
+  /* Decorative blobs */
+  .blob {
+    position: absolute; border-radius: 50%;
+    filter: blur(2px); opacity: .9;
+    pointer-events: none;
+  }
+  .blob-1 { width: 460px; height: 460px; right: -140px; top: -120px;
+    background: radial-gradient(circle at 30% 30%, var(--accent), transparent 70%); opacity: .35; }
+  .blob-2 { width: 320px; height: 320px; left: -100px; bottom: -100px;
+    background: radial-gradient(circle at 30% 30%, #4F7CFF, transparent 70%); opacity: .25; }
+  .dot-grid {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+  }
+  /* LEFT — content */
+  .left {
+    padding: 70px 56px;
+    display: flex; flex-direction: column;
+    position: relative; z-index: 2;
+  }
+  .brand-row {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 8px;
+  }
+  .logo {
+    width: 48px; height: 48px;
+    background: var(--accent);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; color: #fff; font-size: 24px;
+    letter-spacing: -0.02em;
+  }
+  .brand-name {
+    font-weight: 800; font-size: 26px; letter-spacing: 0.02em;
+  }
+  .brand-tag {
+    color: var(--muted); font-size: 14px; letter-spacing: 0.22em;
+    text-transform: uppercase; margin-bottom: 60px;
+  }
+  .hiring-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    color: var(--accent); font-weight: 700; font-size: 18px;
+    text-transform: uppercase; letter-spacing: 0.18em;
+    margin-bottom: 14px;
+  }
+  .hiring-eyebrow::before {
+    content: ""; width: 36px; height: 3px; background: var(--accent);
+  }
+  .role-title {
+    font-size: 72px; line-height: 0.98; font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 26px;
+  }
+  .role-title .accent { color: var(--accent); }
+  .meta-row {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    margin-bottom: 38px;
+  }
+  .meta-chip {
+    background: var(--chip-bg);
+    border: 1px solid rgba(255,255,255,0.14);
+    padding: 12px 18px; border-radius: 999px;
+    font-size: 17px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .meta-chip svg { width: 16px; height: 16px; }
+  .section-label {
+    color: var(--accent); font-weight: 700; font-size: 14px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .req-list {
+    list-style: none; display: flex; flex-direction: column; gap: 12px;
+  }
+  .req-list li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 18px; line-height: 1.45; color: var(--muted);
+  }
+  .req-list li::before {
+    content: ""; flex-shrink: 0;
+    width: 8px; height: 8px; margin-top: 10px;
+    background: var(--accent);
+    transform: rotate(45deg);
+  }
+  .req-list li > span { flex: 1; }
+  .req-list li strong { color: var(--ink); font-weight: 600; }
+  .cta-row {
+    margin-top: 32px;
+    display: flex; align-items: center; gap: 16px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(255,255,255,0.10);
+  }
+  .cta-btn {
+    background: var(--accent); color: #fff;
+    padding: 18px 28px; border-radius: 14px;
+    font-weight: 800; font-size: 17px; letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .cta-email {
+    color: var(--muted); font-size: 16px;
+  }
+  .cta-email b { color: var(--ink); }
+  /* RIGHT — visual */
+  .right {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .visual-frame {
+    width: 92%; height: 86%;
+    border-radius: 28px;
+    overflow: hidden;
+    background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+    position: relative;
+  }
+  .visual-frame img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .visual-fallback {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(circle at 70% 30%, rgba(255,107,53,0.25), transparent 60%),
+      linear-gradient(160deg, #1b2c5e, #0a1530);
+    position: relative;
+    padding: 24px;
+    gap: 12px;
+  }
+  .visual-fallback::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.08) 1.5px, transparent 1.5px);
+    background-size: 26px 26px;
+    opacity: .5;
+    pointer-events: none;
+  }
+  .tags-row {
+    display: flex; justify-content: space-between; width: 100%;
+    position: relative; z-index: 3;
+    margin-bottom: 10px;
+  }
+  .flat-char {
+    width: 380px; height: 380px;
+    position: relative; z-index: 2;
+    flex-shrink: 0;
+  }
+  .skills-cloud {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center;
+    z-index: 3;
+    margin-top: 10px;
+    width: 100%;
+  }
+  .skills-cloud span {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: #fff;
+    padding: 7px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+  }
+  .badge-ring {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 900; font-size: 15px;
+    text-align: center; line-height: 1.1;
+    border: 5px solid var(--bg);
+    transform: rotate(-12deg);
+    box-shadow: 0 18px 36px rgba(0,0,0,0.35);
+    flex-shrink: 0;
+    margin-top: 8px;
+  }
+  .float-tag {
+    background: #fff; color: var(--brand);
+    padding: 11px 16px; border-radius: 12px;
+    font-weight: 800; font-size: 14px;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .float-tag.t1 { transform: rotate(-4deg); align-self: flex-start; }
+  .float-tag.t2 { transform: rotate(3deg); background: var(--accent); color: #fff; align-self: flex-end; }
+</style>
+</head>
+<body>
+<div class="poster" id="poster">
+  <div class="dot-grid"></div>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <section class="left">
+    <div class="brand-row">
+      <div class="logo" id="logo">E</div>
+      <div>
+        <div class="brand-name" id="company">EWIRE</div>
+        <div class="brand-tag" id="tagline">Your Payment Partner</div>
+      </div>
+    </div>
+
+    <div class="hiring-eyebrow">We are Hiring</div>
+    <h1 class="role-title" id="role">Senior Backend <span class="accent">Developer</span></h1>
+
+    <div class="meta-row" id="meta"></div>
+
+    <div class="section-label">What we're looking for</div>
+    <ul class="req-list" id="reqs"></ul>
+
+    <div class="cta-row">
+      <div class="cta-btn">Apply Now</div>
+      <div class="cta-email">Drop your CV at <b id="email">hr@ewire.com</b></div>
+    </div>
+  </section>
+
+  <aside class="right">
+    <div class="visual-frame" id="visual">
+      <div class="visual-fallback">
+        <!-- Flat CSS character fallback -->
+        <div class="tags-row">
+          <div class="float-tag t1">⚡ Hiring Fast</div>
+          <div class="float-tag t2">→ Apply Today</div>
+        </div>
+        <svg class="flat-char" viewBox="0 0 360 360" xmlns="http://www.w3.org/2000/svg">
+          <!-- chair back -->
+          <rect x="80" y="120" width="200" height="160" rx="22" fill="#1f2d57"/>
+          <!-- body / hoodie -->
+          <path d="M70 360 Q70 220 180 200 Q290 220 290 360 Z" fill="#FF6B35"/>
+          <!-- neck -->
+          <rect x="160" y="100" width="40" height="40" fill="#E8B894"/>
+          <!-- head -->
+          <circle cx="180" cy="80" r="48" fill="#E8B894"/>
+          <!-- hair -->
+          <path d="M132 70 Q180 18 228 70 Q228 38 180 28 Q132 38 132 70 Z" fill="#2a2a2a"/>
+          <!-- glasses -->
+          <circle cx="162" cy="80" r="14" fill="none" stroke="#222" stroke-width="4"/>
+          <circle cx="200" cy="80" r="14" fill="none" stroke="#222" stroke-width="4"/>
+          <line x1="176" y1="80" x2="186" y2="80" stroke="#222" stroke-width="4"/>
+          <!-- eyes -->
+          <circle cx="162" cy="80" r="3" fill="#222"/>
+          <circle cx="200" cy="80" r="3" fill="#222"/>
+          <!-- smile -->
+          <path d="M166 100 Q180 110 196 100" stroke="#7a4a2a" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <!-- laptop -->
+          <rect x="120" y="280" width="120" height="80" rx="8" fill="#2a2a2a"/>
+          <rect x="128" y="288" width="104" height="64" rx="4" fill="#4F7CFF"/>
+          <rect x="100" y="358" width="160" height="8" rx="4" fill="#444"/>
+        </svg>
+        <div class="badge-ring">WE'RE<br>HIRING!</div>
+        <div class="skills-cloud" id="skillsCloud">
+          <span>Python</span>
+          <span>Django</span>
+          <span>Flask</span>
+          <span>PostgreSQL</span>
+          <span>Docker</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+const DEFAULTS = {
+  company: "EWIRE",
+  logoLetter: "E",
+  tagline: "Your Payment Partner",
+  role: "Senior Backend Developer",
+  roleAccentWord: "Developer",   // word in `role` to color with accent (case-insensitive)
+  location: "Cochin, Kerala",
+  experience: "5+ years",
+  education: "B.Tech in Computer Science",
+  email: "hr@ewire.com",
+  cta: "Apply Now",
+  requirements: [
+    "Expert in <strong>Python</strong> with related libraries & frameworks",
+    "Solid grasp of <strong>Web development</strong> (Django, Flask)",
+    "<strong>5+ years</strong> of backend engineering experience",
+    "Bachelor's degree in <strong>Computer Science</strong> or equivalent"
+  ],
+  skills: ["Python", "Django", "Flask", "PostgreSQL", "Docker"],
+  heroImage: "",   // optional URL — when empty, the flat SVG character is shown
+  theme: { brand: "#0E1B3D", accent: "#FF6B35", bg: "#0E1B3D" }
+};
+
+function readURLParams() {
+  const p = new URLSearchParams(location.search);
+  const out = {};
+  for (const [k, v] of p.entries()) {
+    if (k === "requirements") out.requirements = v.split("|").map(s => s.trim()).filter(Boolean);
+    else if (k === "skills") out.skills = v.split("|").map(s => s.trim()).filter(Boolean);
+    else if (k.startsWith("theme.")) {
+      out.theme = out.theme || {};
+      out.theme[k.slice(6)] = v;
+    } else out[k] = v;
+  }
+  return out;
+}
+
+function mergeData() {
+  const urlData = readURLParams();
+  const merged = { ...DEFAULTS, ...urlData };
+  merged.theme = { ...DEFAULTS.theme, ...(urlData.theme || {}), ...(window.POSTER_DATA?.theme || {}) };
+  if (window.POSTER_DATA) Object.assign(merged, window.POSTER_DATA, { theme: merged.theme });
+  return merged;
+}
+
+function applyTheme(t) {
+  const r = document.documentElement.style;
+  r.setProperty("--brand", t.brand);
+  r.setProperty("--accent", t.accent);
+  r.setProperty("--bg", t.bg);
+}
+
+function renderPoster(data) {
+  data = data || mergeData();
+  applyTheme(data.theme);
+
+  document.getElementById("logo").textContent = (data.logoLetter || (data.company || "?")[0]).toUpperCase();
+  document.getElementById("company").textContent = data.company;
+  document.getElementById("tagline").textContent = data.tagline;
+  document.getElementById("email").textContent = data.email;
+
+  // Role with accent word
+  const roleEl = document.getElementById("role");
+  const role = data.role || "";
+  if (data.roleAccentWord) {
+    const re = new RegExp("(" + data.roleAccentWord.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "i");
+    roleEl.innerHTML = role.replace(re, '<span class="accent">$1</span>');
+  } else {
+    roleEl.textContent = role;
+  }
+
+  // Meta chips
+  const meta = document.getElementById("meta");
+  meta.innerHTML = "";
+  const items = [];
+  if (data.location)  items.push({ icon: "pin",   text: data.location });
+  if (data.experience) items.push({ icon: "brief", text: data.experience });
+  if (data.education) items.push({ icon: "cap",   text: data.education });
+  for (const it of items) {
+    const chip = document.createElement("div");
+    chip.className = "meta-chip";
+    let svg = "";
+    if (it.icon === "pin")   svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-7.5 7-13a7 7 0 1 0-14 0c0 5.5 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>';
+    if (it.icon === "brief") svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+    if (it.icon === "cap")   svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8l10-4 10 4-10 4z"/><path d="M6 10v6c0 1 3 3 6 3s6-2 6-3v-6"/></svg>';
+    chip.innerHTML = svg + "<span>" + it.text + "</span>";
+    meta.appendChild(chip);
+  }
+
+  // Requirements
+  const ul = document.getElementById("reqs");
+  ul.innerHTML = "";
+  for (const r of data.requirements) {
+    const li = document.createElement("li");
+    const span = document.createElement("span");
+    span.innerHTML = r;
+    li.appendChild(span);
+    ul.appendChild(li);
+  }
+
+  // CTA
+  document.querySelector(".cta-btn").textContent = data.cta || "Apply Now";
+
+  // Visual — image if provided, else keep fallback
+  const vis = document.getElementById("visual");
+  if (data.heroImage) {
+    vis.innerHTML = '<img src="' + data.heroImage + '" alt="hero" crossorigin="anonymous">';
+  } else {
+    // update skills cloud
+    const cloud = document.getElementById("skillsCloud");
+    if (cloud && data.skills) {
+      cloud.innerHTML = "";
+      for (const s of data.skills) {
+        const sp = document.createElement("span");
+        sp.textContent = s;
+        cloud.appendChild(sp);
+      }
+    }
+  }
+}
+
+// Expose for pipeline + auto-render
+window.renderPoster = renderPoster;
+window.addEventListener("DOMContentLoaded", () => renderPoster());
+</script>
+</body>
+</html>

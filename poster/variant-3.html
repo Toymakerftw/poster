@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080, initial-scale=1">
+<title>Variant 3 · Light Corporate</title>
+<!--
+  VARIANT 3 — "Light Corporate"  (EWIRE Flutter-inspired)
+-->
+<style>
+  :root {
+    --brand: #1E88E5;
+    --accent: #FF7043;
+    --ink: #102A43;
+    --bg: #F4F8FE;
+    --panel: #FFFFFF;
+    --muted: #5B7187;
+    --line: #DCE6F1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #d9e2ee; }
+  body { font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif; }
+  .poster {
+    width: 1080px; height: 1080px;
+    background: var(--bg);
+    color: var(--ink);
+    position: relative;
+    overflow: hidden;
+    padding: 50px 56px;
+    display: flex; flex-direction: column;
+  }
+  /* decorative dots */
+  .deco-dot {
+    position: absolute; border-radius: 50%;
+    pointer-events: none;
+  }
+  .deco-dot.d1 { width: 220px; height: 220px; left: -90px; top: -90px; background: rgba(30,136,229,0.08); }
+  .deco-dot.d2 { width: 140px; height: 140px; right: 40px; bottom: 220px; background: rgba(255,112,67,0.10); }
+  .deco-dot.d3 { width: 60px; height: 60px; left: 80px; bottom: 80px; background: rgba(30,136,229,0.10); }
+  .dot-pattern {
+    position: absolute; left: 30px; bottom: 30px;
+    width: 140px; height: 140px;
+    background-image: radial-gradient(rgba(30,136,229,0.30) 2px, transparent 2px);
+    background-size: 18px 18px;
+    opacity: 0.5;
+  }
+
+  /* header */
+  .header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px; position: relative; z-index: 2;
+  }
+  .logo {
+    width: 52px; height: 52px;
+    background: var(--brand);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 900; font-size: 26px;
+  }
+  .brand-name {
+    font-weight: 800; font-size: 24px; letter-spacing: 0.04em;
+    color: var(--ink);
+  }
+  .brand-tag {
+    color: var(--muted); font-size: 13px; letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* main */
+  .main {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    grid-template-rows: 1fr;
+    gap: 36px;
+    position: relative; z-index: 2;
+    flex: 1;
+    min-height: 0;
+  }
+  .left { display: flex; flex-direction: column; }
+  .eyebrow {
+    color: var(--accent); font-weight: 800; font-size: 18px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 12px;
+    margin-bottom: 14px;
+  }
+  .eyebrow::before {
+    content: ""; width: 32px; height: 3px; background: var(--accent);
+  }
+  .role {
+    font-size: 64px; line-height: 1; font-weight: 900;
+    letter-spacing: -0.02em; color: var(--ink);
+    margin-bottom: 22px;
+  }
+  .role span { color: var(--brand); }
+
+  .meta-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-bottom: 26px;
+  }
+  .meta-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .meta-card .icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(30,136,229,0.10);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--brand);
+    flex-shrink: 0;
+  }
+  .meta-card .icon svg { width: 20px; height: 20px; }
+  .meta-card .label {
+    font-size: 11px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.14em; font-weight: 700;
+  }
+  .meta-card .value { font-weight: 700; font-size: 16px; color: var(--ink); }
+
+  .req-title {
+    font-weight: 800; font-size: 14px; text-transform: uppercase;
+    letter-spacing: 0.16em; color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .req-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .req-list li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 17px; line-height: 1.4; color: var(--ink);
+  }
+  .req-list li > span { flex: 1; }
+  .req-list li::before {
+    content: ""; flex-shrink: 0;
+    width: 22px; height: 22px; margin-top: 2px;
+    border-radius: 50%;
+    background: var(--accent);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M9 16.2l-3.5-3.5L4 14.2l5 5 11-11-1.5-1.5z'/></svg>");
+    background-size: 14px; background-position: center; background-repeat: no-repeat;
+  }
+
+  .cta-block {
+    margin-top: auto;
+    background: var(--panel);
+    border: 1px dashed var(--brand);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+  }
+  .cta-block .email-label {
+    font-size: 12px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.14em; font-weight: 700;
+  }
+  .cta-block .email {
+    font-weight: 800; font-size: 18px; color: var(--brand);
+  }
+  .cta-btn {
+    background: var(--brand); color: #fff;
+    padding: 12px 22px; border-radius: 10px;
+    font-weight: 800; font-size: 15px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+
+  /* RIGHT — visual panel */
+  .right {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(16,42,67,0.10);
+  }
+  .visual-img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .visual-fallback {
+    width: 100%; height: 100%;
+    background: linear-gradient(160deg, #E3F2FD 0%, #BBDEFB 100%);
+    position: relative;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding: 0;
+  }
+  .visual-fallback::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      radial-gradient(rgba(255,255,255,0.4) 1.5px, transparent 1.5px),
+      radial-gradient(rgba(30,136,229,0.12) 1.5px, transparent 1.5px);
+    background-size: 22px 22px, 22px 22px;
+    background-position: 0 0, 11px 11px;
+    pointer-events: none;
+  }
+  .visual-stage {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 30px 20px;
+    z-index: 1;
+    gap: 0;
+    flex: 1;
+  }
+  .code-window {
+    position: relative;
+    width: 86%;
+    background: #0D1B2A;
+    border-radius: 12px;
+    padding: 16px 18px 18px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+    z-index: 1;
+  }
+  .code-window .dot-row {
+    display: flex; gap: 5px; margin-bottom: 12px;
+  }
+  .code-window .dot-row span {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .code-window .dot-row span:nth-child(1) { background: #FF5F56; }
+  .code-window .dot-row span:nth-child(2) { background: #FFBD2E; }
+  .code-window .dot-row span:nth-child(3) { background: #27C93F; }
+  .code-window .code-line {
+    height: 7px; border-radius: 4px; margin-bottom: 7px;
+  }
+  .code-window .code-line.c1 { width: 70%; background: #FF7043; }
+  .code-window .code-line.c2 { width: 50%; background: #4FC3F7; }
+  .code-window .code-line.c3 { width: 88%; background: #A5D6A7; }
+  .code-window .code-line.c4 { width: 40%; background: #FFD54F; }
+  .code-window .code-line.c5 { width: 60%; background: #CE93D8; }
+  .code-window .code-line.c6 { width: 30%; background: #4FC3F7; }
+
+  .char {
+    position: relative; z-index: 2;
+    width: 220px;
+    margin-top: 8px;
+  }
+  .char svg { width: 100%; height: auto; display: block; }
+
+  .stats-strip {
+    background: #fff;
+    border-top: 1px solid var(--line);
+    padding: 18px 22px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    z-index: 2;
+  }
+  .stats-strip .stat {
+    text-align: center;
+  }
+  .stats-strip .stat .num {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 900; font-size: 30px;
+    color: var(--brand); line-height: 1;
+  }
+  .stats-strip .stat .lbl {
+    font-size: 10px; font-weight: 700;
+    color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.14em; margin-top: 4px;
+  }
+  .stats-strip .stat + .stat { border-left: 1px solid var(--line); }
+
+  .badge {
+    position: absolute; top: 24px; right: 24px;
+    background: var(--accent); color: #fff;
+    padding: 8px 14px; border-radius: 999px;
+    font-weight: 800; font-size: 13px; letter-spacing: 0.1em;
+    text-transform: uppercase; z-index: 3;
+    box-shadow: 0 8px 18px rgba(255,112,67,0.4);
+  }
+
+  .footer-strip {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: 8px;
+    background: linear-gradient(90deg, var(--brand) 0%, var(--accent) 100%);
+  }
+</style>
+</head>
+<body>
+<div class="poster" id="poster">
+  <div class="deco-dot d1"></div>
+  <div class="deco-dot d2"></div>
+  <div class="deco-dot d3"></div>
+  <div class="dot-pattern"></div>
+
+  <div class="header">
+    <div class="logo" id="logo">E</div>
+    <div>
+      <div class="brand-name" id="company">EWIRE</div>
+      <div class="brand-tag" id="tagline">Your Payment Partner</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <section class="left">
+      <div class="eyebrow">We're Hiring</div>
+      <h1 class="role" id="role">Flutter <span>Developer</span></h1>
+
+      <div class="meta-grid" id="meta-grid"></div>
+
+      <div class="req-title">Roles & Responsibilities</div>
+      <ul class="req-list" id="reqs"></ul>
+
+      <div class="cta-block">
+        <div>
+          <div class="email-label">Send your CV to</div>
+          <div class="email" id="email">hr@ewire.com</div>
+        </div>
+        <div class="cta-btn" id="cta">Apply</div>
+      </div>
+    </section>
+
+    <aside class="right" id="visual">
+      <div class="visual-fallback">
+        <div class="badge">Hiring Now</div>
+        <div class="visual-stage">
+          <div class="code-window">
+            <div class="dot-row"><span></span><span></span><span></span></div>
+            <div class="code-line c1"></div>
+            <div class="code-line c2"></div>
+            <div class="code-line c3"></div>
+            <div class="code-line c4"></div>
+            <div class="code-line c5"></div>
+            <div class="code-line c6"></div>
+          </div>
+          <div class="char">
+            <svg viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+              <!-- body / shirt -->
+              <path d="M40 280 Q40 150 140 140 Q240 150 240 280 Z" fill="#D81B60"/>
+              <!-- arms -->
+              <path d="M40 190 Q20 220 30 280 L60 280 L60 200 Z" fill="#C2185B"/>
+              <path d="M240 190 Q260 220 250 280 L220 280 L220 200 Z" fill="#C2185B"/>
+              <!-- neck -->
+              <rect x="120" y="50" width="40" height="40" fill="#E8B894"/>
+              <!-- head -->
+              <ellipse cx="140" cy="30" rx="48" ry="52" fill="#E8B894"/>
+              <!-- hair -->
+              <path d="M92 30 Q92 -22 140 -22 Q188 -22 188 30 L188 6 Q170 -12 140 -12 Q110 -12 92 6 Z" fill="#3E2723"/>
+              <!-- eyes -->
+              <circle cx="124" cy="32" r="4" fill="#222"/>
+              <circle cx="156" cy="32" r="4" fill="#222"/>
+              <!-- smile -->
+              <path d="M126 54 Q140 64 154 54" stroke="#7a4a2a" stroke-width="3" fill="none" stroke-linecap="round"/>
+              <!-- laptop (in front of body) -->
+              <rect x="80" y="200" width="120" height="60" rx="6" fill="#263238"/>
+              <rect x="88" y="208" width="104" height="44" rx="3" fill="#4FC3F7"/>
+              <rect x="68" y="258" width="144" height="6" rx="3" fill="#37474F"/>
+            </svg>
+          </div>
+        </div>
+        <div class="stats-strip">
+          <div class="stat">
+            <div class="num">4+</div>
+            <div class="lbl">Years exp</div>
+          </div>
+          <div class="stat">
+            <div class="num">∞</div>
+            <div class="lbl">Growth</div>
+          </div>
+          <div class="stat">
+            <div class="num">ASAP</div>
+            <div class="lbl">Start date</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="footer-strip"></div>
+</div>
+
+<script>
+const DEFAULTS = {
+  company: "EWIRE",
+  logoLetter: "E",
+  tagline: "Your Payment Partner",
+  role: "Flutter Developer",
+  roleAccentWord: "Developer",
+  location: "Ernakulam",
+  experience: "4+ years",
+  email: "hr@ewire.com",
+  cta: "Apply",
+  requirements: [
+    "Build & maintain mobile apps using <strong>Flutter & Dart</strong>",
+    "Integrate <strong>REST APIs, Firebase</strong> and third-party services",
+    "Knowledge of App Store & Play Store deployment",
+    "Version control with <strong>Git / Bitbucket</strong>",
+    "Strong problem-solving & debugging skills",
+    "Experience with <strong>Mockito, unit & widget testing</strong>"
+  ],
+  heroImage: "",
+  theme: { brand: "#1E88E5", accent: "#FF7043", bg: "#F4F8FE" }
+};
+
+function readURLParams() {
+  const p = new URLSearchParams(location.search);
+  const out = {};
+  for (const [k, v] of p.entries()) {
+    if (k === "requirements") out.requirements = v.split("|").map(s => s.trim()).filter(Boolean);
+    else if (k.startsWith("theme.")) {
+      out.theme = out.theme || {};
+      out.theme[k.slice(6)] = v;
+    } else out[k] = v;
+  }
+  return out;
+}
+
+function mergeData() {
+  const urlData = readURLParams();
+  const merged = { ...DEFAULTS, ...urlData };
+  merged.theme = { ...DEFAULTS.theme, ...(urlData.theme || {}), ...(window.POSTER_DATA?.theme || {}) };
+  if (window.POSTER_DATA) Object.assign(merged, window.POSTER_DATA, { theme: merged.theme });
+  return merged;
+}
+
+function applyTheme(t) {
+  const r = document.documentElement.style;
+  r.setProperty("--brand", t.brand);
+  r.setProperty("--accent", t.accent);
+  r.setProperty("--bg", t.bg);
+}
+
+function renderPoster(data) {
+  data = data || mergeData();
+  applyTheme(data.theme);
+
+  document.getElementById("logo").textContent = (data.logoLetter || (data.company || "?")[0]).toUpperCase();
+  document.getElementById("company").textContent = data.company;
+  document.getElementById("tagline").textContent = data.tagline;
+  document.getElementById("email").textContent = data.email;
+  document.getElementById("cta").textContent = data.cta;
+
+  const roleEl = document.getElementById("role");
+  const role = data.role || "";
+  if (data.roleAccentWord) {
+    const re = new RegExp("(" + data.roleAccentWord.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ")", "i");
+    roleEl.innerHTML = role.replace(re, '<span>$1</span>');
+  } else {
+    roleEl.textContent = role;
+  }
+
+  // meta grid
+  const grid = document.getElementById("meta-grid");
+  grid.innerHTML = "";
+  const items = [];
+  if (data.location)   items.push({ icon: "pin",   label: "Location",   value: data.location });
+  if (data.experience) items.push({ icon: "brief", label: "Experience", value: data.experience });
+  if (data.education)  items.push({ icon: "cap",   label: "Education",  value: data.education });
+  if (data.employmentType) items.push({ icon: "tag", label: "Type", value: data.employmentType });
+  for (const it of items) {
+    const card = document.createElement("div");
+    card.className = "meta-card";
+    let svg = "";
+    if (it.icon === "pin")   svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s7-7.5 7-13a7 7 0 1 0-14 0c0 5.5 7 13 7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>';
+    if (it.icon === "brief") svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+    if (it.icon === "cap")   svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8l10-4 10 4-10 4z"/><path d="M6 10v6c0 1 3 3 6 3s6-2 6-3v-6"/></svg>';
+    if (it.icon === "tag")   svg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 13l-7 7a2 2 0 0 1-2.8 0L3 13V3h10z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>';
+    card.innerHTML = '<div class="icon">' + svg + '</div><div><div class="label">' + it.label + '</div><div class="value">' + it.value + '</div></div>';
+    grid.appendChild(card);
+  }
+
+  const ul = document.getElementById("reqs");
+  ul.innerHTML = "";
+  for (const r of data.requirements) {
+    const li = document.createElement("li");
+    const span = document.createElement("span");
+    span.innerHTML = r;
+    li.appendChild(span);
+    ul.appendChild(li);
+  }
+
+  const vis = document.getElementById("visual");
+  if (data.heroImage) {
+    vis.innerHTML = '<img class="visual-img" src="' + data.heroImage + '" alt="hero" crossorigin="anonymous">';
+  } else {
+    // update stats strip with real data
+    const stats = vis.querySelectorAll(".stats-strip .stat .num");
+    if (stats.length >= 1 && data.experience) stats[0].textContent = data.experience;
+    if (stats.length >= 2 && (data.employmentType || data.workplace)) stats[1].textContent = data.employmentType || data.workplace;
+    if (stats.length >= 3) stats[2].textContent = data.startDate || "ASAP";
+  }
+}
+
+window.renderPoster = renderPoster;
+window.addEventListener("DOMContentLoaded", () => renderPoster());
+</script>
+</body>
+</html>
