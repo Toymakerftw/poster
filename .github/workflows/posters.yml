@@ -27,6 +27,11 @@ on:
         description: "Device scale factor (1 = 1080px, 2 = 2160px)"
         required: false
         default: "1"
+      telegram:
+        description: "Send posters to Telegram"
+        type: boolean
+        required: false
+        default: true
 
 permissions:
   contents: write
@@ -65,9 +70,16 @@ jobs:
           VARIANT: ${{ github.event.inputs.variant || '4' }}
           SCALE: ${{ github.event.inputs.scale || '1' }}
           BACKFILL: ${{ github.event.inputs.backfill || 'false' }}
+          TELEGRAM_ENABLED: ${{ github.event.inputs.telegram || 'true' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_WEBHOOK_URL: ${{ secrets.TELEGRAM_WEBHOOK_URL }}
         run: |
           ARGS=(--count "$COUNT" --palette "$PALETTE" --variant "$VARIANT" --scale "$SCALE")
           if [ "$BACKFILL" = "true" ]; then ARGS+=(--backfill); fi
+          if [ "$TELEGRAM_ENABLED" = "true" ] && { [ -n "$TELEGRAM_BOT_TOKEN" ] || [ -n "$TELEGRAM_WEBHOOK_URL" ]; }; then
+            ARGS+=(--telegram)
+          fi
           node scripts/automate.js "${ARGS[@]}"
 
       - name: Upload posters artifact

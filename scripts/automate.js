@@ -4,6 +4,7 @@
 const fs = require("fs");
 const path = require("path");
 const gen = require("../generate.js");
+const telegram = require("./telegram.js");
 
 const ROOT = path.resolve(__dirname, "..");
 
@@ -16,7 +17,11 @@ function parseArgs(argv) {
     backfill: false,
     data: path.join(ROOT, "jobs.json"),
     out: path.join(ROOT, "posts"),
-    state: path.join(ROOT, "state", "processed.json")
+    state: path.join(ROOT, "state", "processed.json"),
+    telegram: false,
+    telegramChat: process.env.TELEGRAM_CHAT_ID || "",
+    telegramToken: process.env.TELEGRAM_BOT_TOKEN || "",
+    telegramWebhook: process.env.TELEGRAM_WEBHOOK_URL || ""
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -29,6 +34,19 @@ function parseArgs(argv) {
     else if (a === "--out" || a === "-o") out.out = path.resolve(next());
     else if (a === "--state" || a === "-s") out.state = path.resolve(next());
     else if (a === "--backfill") out.backfill = true;
+    else if (a === "--telegram") out.telegram = true;
+    else if (a === "--telegram-chat") {
+      out.telegram = true;
+      out.telegramChat = next();
+    }
+    else if (a === "--telegram-token") {
+      out.telegram = true;
+      out.telegramToken = next();
+    }
+    else if (a === "--telegram-webhook") {
+      out.telegram = true;
+      out.telegramWebhook = next();
+    }
     else if (a === "--help" || a === "-h") out.help = true;
     else throw new Error("Unknown option: " + a);
   }
@@ -40,14 +58,23 @@ function usage() {
 
 Usage: node scripts/automate.js [options]
 
-  -n, --count N       max new posts this run, 0 = all (default 0)
-  -v, --variant N     2, 4 or 5                     (default 4)
-  -p, --palette P     rotate | all | name | 1-based index (default rotate)
-      --scale N       device scale factor           (default 2)
-      --backfill      on first run, process every existing job
-  -d, --data FILE     jobs JSON                     (default ./jobs.json)
-  -o, --out DIR       output root                   (default ./posts)
-  -s, --state FILE    seen-id state                 (default ./state/processed.json)
+  -n, --count N          max new posts this run, 0 = all (default 0)
+  -v, --variant N        2, 4 or 5                     (default 4)
+  -p, --palette P        rotate | all | name | 1-based index (default rotate)
+      --scale N          device scale factor           (default 2)
+      --backfill         on first run, process every existing job
+  -d, --data FILE        jobs JSON                     (default ./jobs.json)
+  -o, --out DIR          output root                   (default ./posts)
+  -s, --state FILE       seen-id state                 (default ./state/processed.json)
+      --telegram         send each poster to Telegram (needs bot token + chat id or webhook)
+      --telegram-chat ID override TELEGRAM_CHAT_ID
+      --telegram-token T override TELEGRAM_BOT_TOKEN
+      --telegram-webhook URL override TELEGRAM_WEBHOOK_URL
+
+  Telegram env vars:
+    TELEGRAM_BOT_TOKEN   Bot token from @BotFather
+    TELEGRAM_CHAT_ID     Channel or group ID (e.g. @mychannel or -100...)
+    TELEGRAM_WEBHOOK_URL (Optional) Direct webhook endpoint
 
 Behaviour:
   - The first run records a baseline (all current ids). It still renders the
@@ -106,11 +133,23 @@ function caption(job) {
   return lines.join("\n").trim();
 }
 
-function main() {
+async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) return usage();
   if (![2, 4, 5].includes(args.variant)) throw new Error("--variant must be 2, 4 or 5");
   if (args.count < 0) throw new Error("--count must be >= 0");
+
+  const hasTelegramConfig =
+    Boolean(args.telegramWebhook) ||
+    Boolean(args.telegramToken && args.telegramChat);
+
+  if (args.telegram && !hasTelegramConfig) {
+    console.warn(
+      "⚠️ Telegram delivery enabled (--telegram) but credentials not found.\n" +
+      "   Provide TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID (or TELEGRAM_WEBHOOK_URL).\n" +
+      "   Posters will be rendered, but Telegram dispatch will be skipped."
+    );
+  }
 
   const jobs = JSON.parse(fs.readFileSync(args.data, "utf8"));
   if (!Array.isArray(jobs)) throw new Error("Expected a JSON array in " + args.data);
@@ -153,6 +192,8 @@ function main() {
   const posts = [];
   const processedNow = [];
   let failures = 0;
+  let telegramSent = 0;
+  let telegramFailures = 0;
 
   for (const job of batch) {
     let ok = false;
@@ -164,10 +205,39 @@ function main() {
       try {
         gen.renderJob(job, { variant: args.variant, paletteIndex: pi, outFile, scale: args.scale });
         const heading = gen.instagramTitle(job);
+        const tCaption = telegram.formatTelegramCaption(job, heading);
+        let deliveredToTelegram = false;
+
+        console.log("✓", rel(outFile));
+
+        if (args.telegram && hasTelegramConfig) {
+          try {
+            await telegram.sendToTelegram({
+              imagePath: outFile,
+              heading,
+              job,
+              caption: tCaption,
+              token: args.telegramToken,
+              chatId: args.telegramChat,
+              webhookUrl: args.telegramWebhook
+            });
+            deliveredToTelegram = true;
+            telegramSent++;
+            console.log("  ✈️ Telegram delivered:", heading);
+            // Throttle to respect Telegram rate limits when sending multiple
+            await telegram.sleep(1000);
+          } catch (tErr) {
+            telegramFailures++;
+            console.error("  ✗ Telegram delivery failed:", tErr.message);
+          }
+        }
+
         posts.push({
           heading,
           title: heading,
           caption: caption(job),
+          telegram_caption: tCaption,
+          telegram_sent: deliveredToTelegram,
           image: rel(outFile),
           job_id: job.id,
           company: job.company,
@@ -184,7 +254,6 @@ function main() {
           generated_at: new Date().toISOString()
         });
         ok = true;
-        console.log("✓", rel(outFile));
       } catch (e) {
         failures++;
         console.error("✗", name, "-", e.message.split("\n")[0]);
@@ -203,6 +272,7 @@ function main() {
     generated_at: new Date().toISOString(),
     run: stamp,
     count: posts.length,
+    telegram_delivered: telegramSent,
     posters: posts
   };
   fs.writeFileSync(path.join(runDir, "posts.json"), JSON.stringify(manifest, null, 2) + "\n");
@@ -222,13 +292,15 @@ function main() {
   saveState(args.state, state);
 
   console.log("\nGenerated " + posts.length + " poster(s) for " + processedNow.length + " new job(s)");
+  if (args.telegram && hasTelegramConfig) {
+    console.log(`Telegram: ${telegramSent}/${posts.length} poster(s) delivered`);
+    if (telegramFailures) console.warn(`⚠️  ${telegramFailures} Telegram delivery failure(s)`);
+  }
   console.log("Manifest: " + rel(path.join(runDir, "posts.json")));
-  if (failures) process.exitCode = 1;
+  if (failures || telegramFailures) process.exitCode = 1;
 }
 
-try {
-  main();
-} catch (e) {
+main().catch((e) => {
   console.error("automate:", e.message);
   process.exit(1);
-}
+});
