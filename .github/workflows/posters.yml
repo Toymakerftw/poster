@@ -43,6 +43,7 @@ concurrency:
 jobs:
   generate:
     runs-on: ubuntu-latest
+    environment: KLJobs
     timeout-minutes: 20
     steps:
       - name: Checkout
