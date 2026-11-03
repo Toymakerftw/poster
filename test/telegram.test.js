@@ -206,3 +206,85 @@ test("sendToTelegram throws when missing image or credentials", async () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
 });
+
+test("parseCliArgs defaults to environment variables when flags are omitted", () => {
+  const origToken = process.env.TELEGRAM_BOT_TOKEN;
+  const origChat = process.env.TELEGRAM_CHAT_ID;
+  const origWebhook = process.env.TELEGRAM_WEBHOOK_URL;
+
+  try {
+    process.env.TELEGRAM_BOT_TOKEN = "env-bot-token";
+    process.env.TELEGRAM_CHAT_ID = "env-chat-id";
+    process.env.TELEGRAM_WEBHOOK_URL = "https://custom.webhook.test";
+
+    const parsed = telegram.parseCliArgs(["--manifest", "posts/latest.json"]);
+    assert.equal(parsed.manifest, "posts/latest.json");
+    assert.equal(parsed.token, "env-bot-token");
+    assert.equal(parsed.chat, "env-chat-id");
+    assert.equal(parsed.webhook, "https://custom.webhook.test");
+
+    // Explicit CLI flags override environment variables
+    const overridden = telegram.parseCliArgs(["--token", "cli-token", "--chat", "cli-chat"]);
+    assert.equal(overridden.token, "cli-token");
+    assert.equal(overridden.chat, "cli-chat");
+  } finally {
+    if (origToken !== undefined) process.env.TELEGRAM_BOT_TOKEN = origToken;
+    else delete process.env.TELEGRAM_BOT_TOKEN;
+    if (origChat !== undefined) process.env.TELEGRAM_CHAT_ID = origChat;
+    else delete process.env.TELEGRAM_CHAT_ID;
+    if (origWebhook !== undefined) process.env.TELEGRAM_WEBHOOK_URL = origWebhook;
+    else delete process.env.TELEGRAM_WEBHOOK_URL;
+  }
+});
+
+test("sendManifest reads credentials from environment variables", async () => {
+  let requestCount = 0;
+  const server = http.createServer((req, res) => {
+    requestCount++;
+    const chunks = [];
+    req.on("data", (c) => chunks.push(c));
+    req.on("end", () => {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: true, result: { message_id: 12345 } }));
+    });
+  });
+
+  await new Promise((resolve) => server.listen(0, resolve));
+  const port = server.address().port;
+
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "tg-manifest-test-"));
+  const tmpImg = path.join(tmpDir, "test.png");
+  fs.writeFileSync(tmpImg, Buffer.from("dummy-poster"));
+
+  const manifestPath = path.join(tmpDir, "manifest.json");
+  fs.writeFileSync(
+    manifestPath,
+    JSON.stringify({
+      count: 1,
+      posters: [
+        {
+          image: tmpImg,
+          heading: "Test Job",
+          telegram_sent: false
+        }
+      ]
+    })
+  );
+
+  const origWebhook = process.env.TELEGRAM_WEBHOOK_URL;
+  try {
+    process.env.TELEGRAM_WEBHOOK_URL = `http://127.0.0.1:${port}/sendPhoto`;
+    const res = await telegram.sendManifest({ manifestPath, delayMs: 10 });
+    assert.equal(res.sent, 1);
+    assert.equal(res.failed, 0);
+    assert.equal(requestCount, 1);
+
+    const updated = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    assert.equal(updated.posters[0].telegram_sent, true);
+  } finally {
+    server.close();
+    if (origWebhook !== undefined) process.env.TELEGRAM_WEBHOOK_URL = origWebhook;
+    else delete process.env.TELEGRAM_WEBHOOK_URL;
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+});

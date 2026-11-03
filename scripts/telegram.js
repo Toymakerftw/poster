@@ -202,13 +202,17 @@ async function testTelegramConnection({
   chatId = process.env.TELEGRAM_CHAT_ID,
   webhookUrl = process.env.TELEGRAM_WEBHOOK_URL
 } = {}) {
-  const trimmedToken = token ? String(token).trim() : "";
-  const trimmedChatId = chatId ? String(chatId).trim() : "";
-  const trimmedWebhook = webhookUrl ? String(webhookUrl).trim() : "";
+  const effectiveToken = (token || process.env.TELEGRAM_BOT_TOKEN || "").trim();
+  const effectiveChatId = (chatId || process.env.TELEGRAM_CHAT_ID || "").trim();
+  const effectiveWebhook = (webhookUrl || process.env.TELEGRAM_WEBHOOK_URL || "").trim();
 
-  if (!trimmedWebhook && (!trimmedToken || !trimmedChatId)) {
+  if (!effectiveWebhook && (!effectiveToken || !effectiveChatId)) {
     throw new Error("Missing TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID or TELEGRAM_WEBHOOK_URL.");
   }
+
+  const trimmedToken = effectiveToken;
+  const trimmedChatId = effectiveChatId;
+  const trimmedWebhook = effectiveWebhook;
 
   if (trimmedWebhook && !trimmedWebhook.includes("api.telegram.org")) {
     console.log("Testing custom webhook endpoint:", trimmedWebhook);
@@ -254,6 +258,10 @@ async function sendManifest({
   webhookUrl = process.env.TELEGRAM_WEBHOOK_URL,
   delayMs = 1500
 } = {}) {
+  const effectiveToken = (token || process.env.TELEGRAM_BOT_TOKEN || "").trim();
+  const effectiveChatId = (chatId || process.env.TELEGRAM_CHAT_ID || "").trim();
+  const effectiveWebhook = (webhookUrl || process.env.TELEGRAM_WEBHOOK_URL || "").trim();
+
   const resolvedManifest = path.resolve(manifestPath);
   if (!fs.existsSync(resolvedManifest)) {
     console.log(`ℹ️ Manifest file not found at ${resolvedManifest}. No posters to send.`);
@@ -302,9 +310,9 @@ async function sendManifest({
         heading,
         caption: p.telegram_caption || null,
         job: p,
-        token,
-        chatId,
-        webhookUrl
+        token: effectiveToken,
+        chatId: effectiveChatId,
+        webhookUrl: effectiveWebhook
       });
       p.telegram_sent = true;
       sent++;
@@ -346,9 +354,9 @@ function parseCliArgs(argv) {
     image: null,
     heading: "",
     caption: "",
-    token: "",
-    chat: "",
-    webhook: "",
+    token: process.env.TELEGRAM_BOT_TOKEN || "",
+    chat: process.env.TELEGRAM_CHAT_ID || "",
+    webhook: process.env.TELEGRAM_WEBHOOK_URL || "",
     help: false
   };
   const positional = [];
@@ -401,9 +409,9 @@ async function cli() {
 
   if (args.test) {
     await testTelegramConnection({
-      token: args.token,
-      chatId: args.chat,
-      webhookUrl: args.webhook
+      token: args.token || process.env.TELEGRAM_BOT_TOKEN,
+      chatId: args.chat || process.env.TELEGRAM_CHAT_ID,
+      webhookUrl: args.webhook || process.env.TELEGRAM_WEBHOOK_URL
     });
     return;
   }
@@ -411,9 +419,9 @@ async function cli() {
   if (args.manifest) {
     await sendManifest({
       manifestPath: args.manifest,
-      token: args.token,
-      chatId: args.chat,
-      webhookUrl: args.webhook
+      token: args.token || process.env.TELEGRAM_BOT_TOKEN,
+      chatId: args.chat || process.env.TELEGRAM_CHAT_ID,
+      webhookUrl: args.webhook || process.env.TELEGRAM_WEBHOOK_URL
     });
     return;
   }
@@ -429,9 +437,9 @@ async function cli() {
     imagePath: resolvedImage,
     heading: args.heading,
     caption: args.caption || null,
-    token: args.token,
-    chatId: args.chat,
-    webhookUrl: args.webhook
+    token: args.token || process.env.TELEGRAM_BOT_TOKEN,
+    chatId: args.chat || process.env.TELEGRAM_CHAT_ID,
+    webhookUrl: args.webhook || process.env.TELEGRAM_WEBHOOK_URL
   });
   console.log("✓ Successfully delivered to Telegram!", res.ok ? "(OK)" : "");
 }
@@ -450,5 +458,6 @@ module.exports = {
   formatPlainCaption,
   escapeHtml,
   testTelegramConnection,
-  sleep
+  sleep,
+  parseCliArgs
 };
