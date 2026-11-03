@@ -160,7 +160,10 @@ async function main() {
   const baseline = !state.initialized;
 
   let queue;
-  if (baseline && !args.backfill) {
+  if (args.backfill) {
+    queue = parsed.filter((j) => j.rawText);
+    console.log(`Backfill mode: reprocessing up to ${args.count > 0 ? args.count : 'all'} job(s)`);
+  } else if (baseline) {
     const latest = parsed.reduce((max, j) => (j.scrapedAt > max ? j.scrapedAt : max), "");
     const batchHour = latest.slice(0, 13);
     queue = parsed.filter((j) => j.rawText && !seen.has(j.id) && j.scrapedAt.slice(0, 13) === batchHour);

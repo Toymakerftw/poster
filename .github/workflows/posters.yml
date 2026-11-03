@@ -65,21 +65,45 @@ jobs:
       - name: Generate posters
         env:
           CHROME_BIN: ${{ steps.chrome.outputs.chrome-path }}
-          COUNT: ${{ github.event.inputs.count || '0' }}
-          PALETTE: ${{ github.event.inputs.palette || 'rotate' }}
-          VARIANT: ${{ github.event.inputs.variant || '4' }}
-          SCALE: ${{ github.event.inputs.scale || '1' }}
-          BACKFILL: ${{ github.event.inputs.backfill || 'false' }}
-          TELEGRAM_ENABLED: ${{ github.event.inputs.telegram || 'true' }}
+          COUNT: ${{ inputs.count || github.event.inputs.count || '0' }}
+          PALETTE: ${{ inputs.palette || github.event.inputs.palette || 'rotate' }}
+          VARIANT: ${{ inputs.variant || github.event.inputs.variant || '4' }}
+          SCALE: ${{ inputs.scale || github.event.inputs.scale || '1' }}
+          BACKFILL: ${{ inputs.backfill || github.event.inputs.backfill || 'false' }}
+          TELEGRAM_ENABLED: ${{ inputs.telegram != false && github.event.inputs.telegram != 'false' }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_WEBHOOK_URL: ${{ secrets.TELEGRAM_WEBHOOK_URL }}
         run: |
+          echo "=== Telegram Configuration Status ==="
+          echo "TELEGRAM_ENABLED: $TELEGRAM_ENABLED"
+          if [ -n "$TELEGRAM_BOT_TOKEN" ]; then
+            echo "✓ TELEGRAM_BOT_TOKEN is set (length: ${#TELEGRAM_BOT_TOKEN})"
+          else
+            echo "✗ TELEGRAM_BOT_TOKEN is NOT set in GitHub Repository Secrets"
+          fi
+          if [ -n "$TELEGRAM_CHAT_ID" ]; then
+            echo "✓ TELEGRAM_CHAT_ID is set ($TELEGRAM_CHAT_ID)"
+          else
+            echo "✗ TELEGRAM_CHAT_ID is NOT set in GitHub Repository Secrets"
+          fi
+          if [ -n "$TELEGRAM_WEBHOOK_URL" ]; then
+            echo "✓ TELEGRAM_WEBHOOK_URL is set"
+          fi
+
           ARGS=(--count "$COUNT" --palette "$PALETTE" --variant "$VARIANT" --scale "$SCALE")
           if [ "$BACKFILL" = "true" ]; then ARGS+=(--backfill); fi
-          if [ "$TELEGRAM_ENABLED" = "true" ] && { [ -n "$TELEGRAM_BOT_TOKEN" ] || [ -n "$TELEGRAM_WEBHOOK_URL" ]; }; then
-            ARGS+=(--telegram)
+
+          if [ "$TELEGRAM_ENABLED" = "true" ]; then
+            if [ -n "$TELEGRAM_BOT_TOKEN" ] || [ -n "$TELEGRAM_WEBHOOK_URL" ]; then
+              ARGS+=(--telegram)
+              echo "Telegram dispatch will be requested (--telegram)"
+            else
+              echo "::warning title=Telegram Secrets Missing::Telegram dispatch is enabled, but TELEGRAM_BOT_TOKEN / TELEGRAM_WEBHOOK_URL secrets are not configured in GitHub repository secrets! Messages will not be sent to Telegram."
+            fi
           fi
+
+          echo "Running: node scripts/automate.js ${ARGS[*]}"
           node scripts/automate.js "${ARGS[@]}"
 
       - name: Upload posters artifact
