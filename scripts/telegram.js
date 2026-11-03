@@ -4,6 +4,8 @@
 const fs = require("fs");
 const path = require("path");
 
+const ROOT = path.resolve(__dirname, "..");
+
 function escapeHtml(str) {
   if (!str) return "";
   return String(str)
@@ -245,9 +247,102 @@ async function testTelegramConnection({
   return { ok: true, bot: meData.result, message: msgData.result };
 }
 
+async function sendManifest({
+  manifestPath,
+  token = process.env.TELEGRAM_BOT_TOKEN,
+  chatId = process.env.TELEGRAM_CHAT_ID,
+  webhookUrl = process.env.TELEGRAM_WEBHOOK_URL,
+  delayMs = 1500
+} = {}) {
+  const resolvedManifest = path.resolve(manifestPath);
+  if (!fs.existsSync(resolvedManifest)) {
+    console.log(`ℹ️ Manifest file not found at ${resolvedManifest}. No posters to send.`);
+    return { count: 0, sent: 0, failed: 0 };
+  }
+
+  const raw = fs.readFileSync(resolvedManifest, "utf8");
+  let manifest;
+  try {
+    manifest = JSON.parse(raw);
+  } catch (err) {
+    throw new Error(`Failed to parse manifest JSON at ${resolvedManifest}: ${err.message}`);
+  }
+
+  const posters = Array.isArray(manifest.posters) ? manifest.posters : [];
+  if (!posters.length) {
+    console.log("ℹ️ Manifest contains 0 posters. Nothing to send.");
+    return { count: 0, sent: 0, failed: 0 };
+  }
+
+  const pending = posters.filter((p) => !p.telegram_sent);
+  if (!pending.length) {
+    console.log(`ℹ️ All ${posters.length} poster(s) in manifest have already been sent to Telegram.`);
+    return { count: posters.length, sent: 0, failed: 0 };
+  }
+
+  console.log(`🚀 Dispatching ${pending.length} poster(s) to Telegram...`);
+
+  let sent = 0;
+  let failed = 0;
+
+  for (let i = 0; i < pending.length; i++) {
+    const p = pending[i];
+    let actualImage = path.isAbsolute(p.image) ? p.image : path.resolve(ROOT, p.image);
+    if (!fs.existsSync(actualImage)) {
+      const fallback = path.resolve(path.dirname(resolvedManifest), path.basename(p.image));
+      if (fs.existsSync(fallback)) actualImage = fallback;
+    }
+
+    const heading = p.heading || p.title || path.basename(p.image);
+    console.log(`[${i + 1}/${pending.length}] Sending: ${heading}`);
+
+    try {
+      await sendToTelegram({
+        imagePath: actualImage,
+        heading,
+        caption: p.telegram_caption || null,
+        job: p,
+        token,
+        chatId,
+        webhookUrl
+      });
+      p.telegram_sent = true;
+      sent++;
+      console.log(`  ✈️ Delivered!`);
+
+      // Update manifest progressively so sent status is saved immediately
+      manifest.telegram_delivered = posters.filter((x) => x.telegram_sent).length;
+      fs.writeFileSync(resolvedManifest, JSON.stringify(manifest, null, 2) + "\n");
+      if (manifest.run) {
+        const runManifest = path.resolve(path.dirname(resolvedManifest), manifest.run, "posts.json");
+        if (fs.existsSync(runManifest) && runManifest !== resolvedManifest) {
+          fs.writeFileSync(runManifest, JSON.stringify(manifest, null, 2) + "\n");
+        }
+      }
+
+      if (i < pending.length - 1) {
+        await sleep(delayMs);
+      }
+    } catch (err) {
+      failed++;
+      console.error(`  ✗ Delivery failed: ${err.message}`);
+    }
+  }
+
+  console.log(`\n=== Telegram Dispatch Summary ===`);
+  console.log(`Successfully sent: ${sent}/${pending.length}`);
+  if (failed > 0) {
+    console.warn(`⚠️ Failed: ${failed}`);
+    throw new Error(`${failed} poster(s) failed to send to Telegram.`);
+  }
+
+  return { count: posters.length, sent, failed };
+}
+
 function parseCliArgs(argv) {
   const out = {
     test: false,
+    manifest: null,
     image: null,
     heading: "",
     caption: "",
@@ -261,6 +356,7 @@ function parseCliArgs(argv) {
     const a = argv[i];
     const next = () => argv[++i];
     if (a === "--test") out.test = true;
+    else if (a === "--manifest" || a === "-m") out.manifest = next();
     else if (a === "--token" || a === "-t") out.token = next();
     else if (a === "--chat" || a === "-c") out.chat = next();
     else if (a === "--webhook" || a === "-w") out.webhook = next();
@@ -270,7 +366,7 @@ function parseCliArgs(argv) {
     else if (!a.startsWith("-")) positional.push(a);
     else throw new Error("Unknown argument: " + a);
   }
-  if (positional.length > 0 && !out.image) out.image = positional[0];
+  if (positional.length > 0 && !out.image && !out.manifest) out.image = positional[0];
   if (positional.length > 1 && !out.heading) out.heading = positional[1];
   if (positional.length > 2 && !out.caption) out.caption = positional[2];
   return out;
@@ -281,9 +377,11 @@ function usage() {
 
 Usage:
   node scripts/telegram.js --test [options]
+  node scripts/telegram.js --manifest <manifestPath> [options]
   node scripts/telegram.js <imagePath> [heading] [caption] [options]
 
 Options:
+  -m, --manifest PATH      Send all pending posters from a posts.json manifest
   -t, --token TOKEN        Telegram bot token (default: env TELEGRAM_BOT_TOKEN)
   -c, --chat CHAT_ID       Telegram chat / channel ID (default: env TELEGRAM_CHAT_ID)
   -w, --webhook URL        Custom webhook URL (default: env TELEGRAM_WEBHOOK_URL)
@@ -303,6 +401,16 @@ async function cli() {
 
   if (args.test) {
     await testTelegramConnection({
+      token: args.token,
+      chatId: args.chat,
+      webhookUrl: args.webhook
+    });
+    return;
+  }
+
+  if (args.manifest) {
+    await sendManifest({
+      manifestPath: args.manifest,
       token: args.token,
       chatId: args.chat,
       webhookUrl: args.webhook
@@ -337,6 +445,7 @@ if (require.main === module) {
 
 module.exports = {
   sendToTelegram,
+  sendManifest,
   formatTelegramCaption,
   formatPlainCaption,
   escapeHtml,
