@@ -78,7 +78,7 @@ jobs:
           node scripts/automate.js "${ARGS[@]}"
 
       - name: Send to Telegram
-        if: ${{ inputs.telegram != false && github.event.inputs.telegram != 'false' }}
+        if: ${{ github.event_name == 'schedule' || inputs.telegram != false }}
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
